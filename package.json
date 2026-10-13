@@ -1,0 +1,9 @@
+{
+  "name": "scamshield-my",
+  "private": true,
+  "packageManager": "pnpm@11.23.0",
+  "scripts": {
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
