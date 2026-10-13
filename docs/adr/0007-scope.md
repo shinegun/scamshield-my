@@ -1,7 +1,7 @@
 # 7. Malay and Manglish first; three must-have features; the rest is stretch
 
 - Status: Accepted
-- Date: 2026-10-12
+- Date: 2026-10-12, revised 2026-10-14
 
 ## Context
 
@@ -9,14 +9,26 @@ Six days, two people, both full-stack. The plan lists Malay dialects, Manglish, 
 
 ## Decision
 
-Must be in the video:
+Must ship, in the deployed prototype and the video:
 
-1. The full call flow in standard Malay and Manglish: warnings escalate and the transfer is held.
-2. The fraud team dashboard, live from Supabase.
-3. The Jev vs Gemini speed race on the same transcript chunk.
-4. The warning spoken aloud, not just shown.
+1. Two scripted scam calls, one in standard Malay and one in Manglish, and one scripted innocent call (ADR 5).
+2. The call screen: live transcript, risk bar, scam stage and which scorer answered.
+3. Warnings that escalate in the call's language: a soft banner, then a strong full-screen warning.
+4. The transfer hold: transfers work before the hold and are blocked after it, with a deliberate, delayed release path.
+5. The fraud team dashboard, live from Firestore (ADR 8).
 
-Stretch, cut first if we fall behind:
+Should ship, cut in this order if we fall behind:
+
+1. The warning spoken aloud. Demoted from must-have on 14 October: the banner already proves the function.
+2. The Jev vs Gemini speed race panel. Depends on the Jev cutoff in ADR 2.
+3. Live microphone through Chirp 3.
+
+Not building:
+
+- Login or accounts. The demo opens straight into a fake bank account.
+- Pub/Sub (ADR 8).
+
+Stretch, only if everything above is done:
 
 - Mandarin or Cantonese, and Tamil, through the live pipeline using generated voices. Label them as unverified by a native speaker.
 - Kelantanese and other Malay dialects.

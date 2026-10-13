@@ -4,31 +4,34 @@ Warns Malaysians during a scam call, in the language they speak, and holds the b
 
 - **The pitch:** Google tells you it might be a scam. We stop the money leaving.
 - **The bar:** "Build a working prototype on Google Cloud and submit it for evaluation."
-- **Submission:** recorded video, due about 19 October 2026 (Aqil to confirm the exact time).
+- **Track:** BFSI: Intelligent Risk, Fraud & Financial Experiences (AI Builder Cup 2026).
+- **Submission:** pitch deck on the organisers' template, a 3 to 4 minute demo video, a live prototype link, a public GitHub repo and a brief description covering Firebase, Firestore, Cloud Run and Gemini. The dashboard countdown on 13 October put the close at about 2:29 AM on Monday 19 October Malaysia time (11:59 PM IST on the 18th); treat Sunday 18 October evening as the deadline.
 - **Original plan:** [ScamShield MY — Hackathon Plan](https://claude.ai/artifact/CY158QGGMa3HBGx8WZ4mfF). Where the plan and the ADRs below disagree, the ADRs win.
 
 ## How it fits together
 
 ```
 Bank app (web, phone-styled)  ──WebSocket──▶  Pipeline (Cloud Run)
-  Cloudflare Pages                             ├─ speech-to-text (Chirp 3 or Gemini, see ADR 4)
-                                               ├─ scorer: Jev, Gemini as fallback
+  Firebase Hosting
+                                               ├─ speech-to-text (Chirp 3)
+                                               ├─ scorer: Jev, Gemini on Vertex AI as fallback
                                                ├─ risk engine (packages/shared)
-                                               └─ warning writer + text-to-speech (Gemini)
-Fraud dashboard (web)  ◀──realtime──  Supabase  ◀── sessions, risk history, holds
+                                               └─ warning writer + text-to-speech (Gemini on Vertex AI)
+Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, risk history, holds
 ```
 
 ## Decisions
 
 | # | Decision | Status |
 | --- | --- | --- |
-| [1](docs/adr/0001-hosting-split.md) | Cloud Run for the pipeline, Supabase for data, Cloudflare Pages for the frontend | Accepted |
+| [1](docs/adr/0001-hosting-split.md) | Cloud Run for the pipeline, Supabase for data, Cloudflare Pages for the frontend | Superseded by 8 |
 | [2](docs/adr/0002-scorer.md) | Jev is the primary scorer; Gemini answers the same schema as fallback | Accepted |
 | [3](docs/adr/0003-web-client.md) | The bank app is a web app styled as a phone, with a simulated call | Accepted |
-| [4](docs/adr/0004-speech-to-text.md) | Speech-to-text is picked by a day-1 bake-off | Open |
-| [5](docs/adr/0005-demo-audio.md) | Demo audio is live mic, with transcript replay as fallback | Accepted |
+| [4](docs/adr/0004-speech-to-text.md) | Speech-to-text is Chirp 3, with Gemini audio chunks as the fallback | Accepted |
+| [5](docs/adr/0005-demo-audio.md) | Guided transcript replay is the main demo path; live mic is an optional extra | Accepted |
 | [6](docs/adr/0006-risk-engine.md) | Code, not the model, turns flags into actions | Accepted |
-| [7](docs/adr/0007-scope.md) | Malay and Manglish first; three must-have features; the rest is stretch | Accepted |
+| [7](docs/adr/0007-scope.md) | Malay and Manglish first; five must-have features; the rest is should-have or stretch | Accepted |
+| [8](docs/adr/0008-google-stack.md) | Everything runs on Google Cloud and Firebase except the Jev scorer | Accepted |
 
 ## What exists
 
@@ -52,16 +55,21 @@ pnpm typecheck
 
 ## Next up
 
-1. Pipeline in replay mode: accept `transcript.inject`, score with Gemini, emit `risk` and `warning`.
-2. Web bank app against that socket: call screen, risk bar, warning banner, transfer hold.
-3. Speech-to-text bake-off (ADR 4), then wire live mic audio.
-4. Jev scorer behind the same interface, then the Jev vs Gemini speed race.
-5. Supabase tables and the fraud dashboard.
-6. Spoken warnings, deploy, record the video.
+The work from here to submission is tracked as [GitHub issues](https://github.com/shinegun/scamshield-my/issues), grouped into three milestones:
+
+| Milestone | Date | Means |
+| --- | --- | --- |
+| M1: Replay works locally | Thu 15 Oct | A scripted call runs end to end on a laptop: transcript, risk, warnings, hold |
+| M2: Live and judge-ready | Sat 17 Oct | Deployed on Cloud Run and Firebase Hosting, dashboard live, repo public. Feature freeze |
+| M3: Submitted | Sun 18 Oct, 8 PM | Video, deck, description and links submitted |
+
+How we use them:
+
+- Assign yourself when you start an issue, and only then. One issue each at a time.
+- Do `must` issues before `should` issues.
+- Work on a branch and open a pull request; the other person merges it.
 
 ## Blocked on
 
-- **Jev docs URL** (Aqil): needed for the Jev scorer's request and response shapes.
-- **Google Cloud project with billing** (Aqil): none exists yet, and `gcloud` is not installed on Aqil's machine.
-- **Supabase project** (either): not created yet.
-- **Permission to use the real scam story** in the video (Aqil to ask his friend).
+- **Google Cloud project with billing, Vertex AI and Firebase enabled** (Aqil): none exists yet, and `gcloud` is not installed on Aqil's machine. This blocks the Gemini scorer as well as the deploy.
+- **Jev docs URL** (Aqil): needed for the Jev scorer's request and response shapes. Cutoff is end of Thursday 15 October (ADR 2).
