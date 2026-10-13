@@ -1,6 +1,6 @@
 # 1. Cloud Run for the pipeline, Supabase for data, Cloudflare Pages for the frontend
 
-- Status: Accepted
+- Status: Superseded by [ADR 8](0008-google-stack.md)
 - Date: 2026-10-12
 
 ## Context

@@ -22,5 +22,7 @@ The plan's decision engine is Jev, a hosted model that returns typed answers wit
 ## Consequences
 
 - The pipeline is built against Gemini first, because the Jev request and response shapes are not known yet. The Jev scorer waits on the docs URL.
-- The speed race is a must-have (ADR 7), since it is what justifies a non-Google model in the pitch.
+- Every tick asks Jev first with a hard timeout of about 800 ms; on a timeout or error, Gemini's answer is used, so a call never stalls. The `risk` message says which scorer answered and how long it took, and the bank app shows it.
+- Cutoff: if the Jev scorer is not working by end of Thursday 15 October, the prototype ships Gemini-only and the pitch mentions Jev as planned.
+- The speed race is a should-have (ADR 7). It also supplies the deck's benchmarking slide.
 - Jev runs in the US. Expect roughly 150–250 ms of extra latency from Malaysia; we score every few seconds, so this is acceptable.
