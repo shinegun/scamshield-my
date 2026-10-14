@@ -55,7 +55,7 @@ pnpm typecheck
 
 ## Set up your machine
 
-We share one Google Cloud project. **It does not exist yet:** Aqil is creating it under his own Google account with his billing, and will replace `PROJECT_ID` below with the real ID. The other person needs to be added to it first; the Editor role can be granted from the command line, while Owner has to be an invitation from the console's IAM page.
+We share one Google Cloud project, `scamshield-my-511604`. It is on Aqil's Google account and billing, and both of us are Owners. Firebase is added to it and Firestore has a `(default)` database. Anyone new needs to be added first; the Editor role can be granted from the command line, while Owner has to be an invitation from the console's IAM page.
 
 Install the two command-line tools (macOS, Homebrew):
 
@@ -71,8 +71,8 @@ Sign in and point everything at the project:
 ```bash
 gcloud auth login
 gcloud auth application-default login
-gcloud config set project PROJECT_ID
-gcloud auth application-default set-quota-project PROJECT_ID
+gcloud config set project scamshield-my-511604
+gcloud auth application-default set-quota-project scamshield-my-511604
 firebase login
 ```
 
@@ -80,7 +80,7 @@ Check that Gemini on Vertex AI answers. This should print a JSON reply with a `c
 
 ```bash
 curl -s -X POST \
-  "https://asia-southeast1-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/asia-southeast1/publishers/google/models/gemini-2.5-flash-lite:generateContent" \
+  "https://asia-southeast1-aiplatform.googleapis.com/v1/projects/scamshield-my-511604/locations/asia-southeast1/publishers/google/models/gemini-2.5-flash:generateContent" \
   -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
   -H "Content-Type: application/json" \
   -d '{"contents":[{"role":"user","parts":[{"text":"Reply with the single word: ok"}]}]}'
@@ -90,7 +90,9 @@ Where things run:
 
 | Service | Location | Why |
 | --- | --- | --- |
-| Firestore (native mode), Cloud Run, Gemini on Vertex AI | `asia-southeast1` (Singapore) | Closest region to Malaysia. The Firestore location cannot be changed. |
+| Firestore (native mode, `(default)` database), Cloud Run | `asia-southeast1` (Singapore) | Closest region to Malaysia. The Firestore location cannot be changed. |
+| Gemini 2.5 Flash on Vertex AI | `asia-southeast1` (Singapore) | Checked on 14 October: the only Gemini model we tried that answers here. |
+| Gemini 2.5 Flash-Lite, 2.5 Pro, 3 Flash (preview), 3.1 Flash-Lite | `global` | Checked on 14 October: these return 404 in `asia-southeast1` but answer on the global endpoint. |
 | Speech-to-Text Chirp 3 | `us` or `eu` multi-region | Chirp 3 is not offered in `asia-southeast1`. |
 | Gemini text-to-speech | `global` | The current preview models are only served from the global endpoint. |
 
@@ -112,6 +114,6 @@ How we use them:
 
 ## Blocked on
 
-- **Google Cloud project with billing** (Aqil): Aqil creates a new project under his account, because Ilham's billing account could not be opened. On it: link billing; enable `aiplatform`, `firestore`, `firebase`, `firebasehosting`, `speech`, `secretmanager`, `run`, `cloudbuild` and `artifactregistry` (each `.googleapis.com`); create Firestore in native mode in `asia-southeast1`; add Firebase from the [Firebase console](https://console.firebase.google.com) (the CLI's `projects:addfirebase` returned 403 for us); add Ilham to the project. Then put the project ID into "Set up your machine". This blocks the Gemini scorer as well as the deploy, and issue 1 is done when the Gemini check works on both machines.
+- **Gemini check on Ilham's machine** (Ilham): the project `scamshield-my-511604` is set up (billing, the nine APIs, Firestore `(default)` in `asia-southeast1`, Firebase, Ilham as Owner) and the Gemini check answers on Aqil's machine. Issue 1 is done when it also answers on Ilham's.
 - **Old project to ignore or delete** (Ilham): `psyched-cab-511515-q0` ("Google AI Builder Cup") was set up on 14 October with Firestore and four APIs but never got billing. Nothing depends on it.
 - **Jev docs URL** (Aqil): needed for the Jev scorer's request and response shapes. Cutoff is end of Thursday 15 October (ADR 2).
