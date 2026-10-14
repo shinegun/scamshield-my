@@ -47,7 +47,7 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | `services/pipeline/src/server.ts`, `session.ts` | Done, tested. WebSocket server on `/call`: session state, a scoring tick per injected line, `risk` messages, transfer hold and release, `clock.skip`. No Firestore yet. |
 | `services/pipeline/src/warnings` | Done, tested. One warning per new action level, written by Gemini 2.5 Flash in Malay or English, with fixed fallback text if Gemini takes over 2.5 s. |
 | `services/pipeline/src/scorers` | Done, tested. Jev, Gemini 2.5 Flash on Vertex AI, and the fallback wrapper (Jev first, Gemini after 800 ms). |
-| `apps/web` | Empty. Bank app, caller simulator and fraud dashboard. |
+| `apps/web` | Started (#8, #9), 19 tests. Vite + React phone-styled app: replay front door with the three scripted calls, call screen (transcript, risk bar, stage, scorer tag), shared call state in `src/call/CallProvider.tsx`. Warning UI, bank screen and dashboard are placeholders. |
 
 ## Run it
 

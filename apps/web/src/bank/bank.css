@@ -1,0 +1,21 @@
+.bank-bar {
+  flex: none;
+  padding: 10px 16px calc(14px + var(--safe-bottom));
+  border-top: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+
+.bank-bar__open {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.bank-bar__open:disabled {
+  background: var(--bg-raised);
+  color: var(--text-dim);
+}
