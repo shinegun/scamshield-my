@@ -40,6 +40,7 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | `packages/shared/src/schema.ts` | Done. Scam stages, scam types and the 13 red-flag questions sent to the scorer. |
 | `packages/shared/src/risk.ts` | Done, 8 tests. Combines flags into a risk score and an action. |
 | `packages/shared/src/events.ts` | Done. WebSocket messages between the bank app and the pipeline. |
+| `packages/shared/src/scripts` | Done, 4 tests. The three replay calls: Malay scam, Manglish scam, innocent bank check. Malay and Manglish wording waiting on a native read. |
 | `services/pipeline` | Empty. Cloud Run service. |
 | `apps/web` | Empty. Bank app, caller simulator and fraud dashboard. |
 
