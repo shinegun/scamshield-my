@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
+  ACTIONS,
   absorb,
   decideAction,
   emptySession,
@@ -14,6 +15,7 @@ import {
   type TransferStatus,
 } from '@scamshield/shared';
 import type { Scorer } from './scorers/types';
+import { writeWarning, type WarningWriter } from './warnings/writer';
 
 // Roughly the 30-60 seconds of speech the live pipeline will send; the same
 // window try-jev.ts used when we tested against Jev.
@@ -21,6 +23,8 @@ const WINDOW_LINES = 2;
 
 export interface SessionOptions {
   scorer: Scorer;
+  // Writes the warning text; without one the fixed fallback strings are used.
+  writer?: WarningWriter;
   now: () => number;
   send: (message: ServerMessage) => void;
   // Called once when the client sends session.end.
@@ -61,6 +65,10 @@ export class CallSession {
   private bankAppOpen = false;
   private transferScreenOpen = false;
   private transfers = new Map<string, Transfer>();
+  // Highest action already warned about, so each level is warned once per call.
+  private warnedRank = 0;
+  // Warnings are written in parallel but sent in the order they were raised.
+  private warnChain: Promise<unknown> = Promise.resolve();
   // Every message after session.start runs through this chain, so scoring
   // ticks go one at a time in arrival order (session memory stays monotonic,
   // ADR 6) and a transfer sees the result of the lines sent before it.
@@ -247,6 +255,28 @@ export class CallSession {
       scorer,
       latencyMs,
       atSec,
+    });
+    this.warnIfRaised(started, action);
+  }
+
+  // Called right after the `risk` message, and never waited on: the warning is
+  // sent whenever its text is ready (the fallback string if the writer is slow).
+  private warnIfRaised(started: Started, action: Action): void {
+    const rank = ACTIONS.indexOf(action);
+    if (rank <= this.warnedRank) return;
+    this.warnedRank = rank;
+    if (action === 'none') return;
+
+    const pending = writeWarning(this.opts.writer, {
+      action,
+      language: started.language,
+      scamType: this.lastScamType,
+      stage: this.risk.stageReached,
+      flagsSeen: flagsSeen(this.risk),
+    });
+    this.warnChain = Promise.all([this.warnChain, pending]).then(([, text]) => {
+      if (this.ended) return;
+      this.opts.send({ type: 'warning', action, text, language: started.language });
     });
   }
 
