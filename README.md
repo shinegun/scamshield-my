@@ -41,6 +41,7 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | `packages/shared/src/risk.ts` | Done, 8 tests. Combines flags into a risk score and an action. |
 | `packages/shared/src/events.ts` | Done. WebSocket messages between the bank app and the pipeline, including transfer attempt, hold and release. |
 | `packages/shared/src/store.ts` | Done. Firestore document shapes: session, risk entry per tick, transfer hold. |
+| `packages/shared/src/scripts` | Done, 4 tests. The three replay calls: Malay scam, Manglish scam, innocent bank check. |
 | `services/pipeline/src/jev.ts` | Done, 2 tests against a faked API. Run against the real Jev on 14 October: Malay as good as English, 227–364 ms per tick (ADR 2). |
 | `services/pipeline/src/fixtures` | Done. Scripted scam call and normal calls, in Malay and English. |
 | `services/pipeline` (the server) | Not started. Cloud Run service. |
