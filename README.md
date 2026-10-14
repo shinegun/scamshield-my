@@ -41,7 +41,9 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | `packages/shared/src/risk.ts` | Done, 8 tests. Combines flags into a risk score and an action. |
 | `packages/shared/src/events.ts` | Done. WebSocket messages between the bank app and the pipeline, including transfer attempt, hold and release. |
 | `packages/shared/src/store.ts` | Done. Firestore document shapes: session, risk entry per tick, transfer hold. |
-| `services/pipeline` | Empty. Cloud Run service. |
+| `services/pipeline/src/jev.ts` | Done, 2 tests against a faked API. Run against the real Jev on 14 October: Malay as good as English, 227–364 ms per tick (ADR 2). |
+| `services/pipeline/src/fixtures` | Done. Scripted scam call and normal calls, in Malay and English. |
+| `services/pipeline` (the server) | Not started. Cloud Run service. |
 | `apps/web` | Empty. Bank app, caller simulator and fraud dashboard. |
 
 ## Run it
@@ -97,6 +99,16 @@ Where things run:
 | Speech-to-Text Chirp 3 | `us` or `eu` multi-region | Chirp 3 is not offered in `asia-southeast1`. |
 | Gemini text-to-speech | `global` | The current preview models are only served from the global endpoint. |
 
+## Try Jev
+
+Copy `.env.example` to `.env`, set `TYPESAFE_API_KEY`, then:
+
+```bash
+pnpm --filter @scamshield/pipeline try:jev
+```
+
+It plays the scripted calls through Jev in English and in Malay and prints the stage, flags, risk and latency per line. The first run's results are in ADR 2.
+
 ## Next up
 
 The work from here to submission is tracked as [GitHub issues](https://github.com/shinegun/scamshield-my/issues), grouped into three milestones:
@@ -117,4 +129,3 @@ How we use them:
 
 - **Gemini check on Ilham's machine** (Ilham): the project `scamshield-my-511604` is set up (billing, the nine APIs, Firestore `(default)` in `asia-southeast1`, Firebase, Ilham as Owner) and the Gemini check answers on Aqil's machine. Issue 1 is done when it also answers on Ilham's.
 - **Old project to ignore or delete** (Ilham): `psyched-cab-511515-q0` ("Google AI Builder Cup") was set up on 14 October with Firestore and four APIs but never got billing. Nothing depends on it.
-- **Jev docs URL** (Aqil): needed for the Jev scorer's request and response shapes. Cutoff is end of Thursday 15 October (ADR 2).

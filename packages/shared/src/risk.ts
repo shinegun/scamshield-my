@@ -1,7 +1,7 @@
 import {
   RED_FLAGS,
   RED_FLAG_KEYS,
-  SCAM_STAGES,
+  SCAM_STAGE_KEYS,
   type Decision,
   type FlagScores,
   type RedFlag,
@@ -92,7 +92,7 @@ function atLeast(action: Action, floor: Action): Action {
 }
 
 function stageRank(stage: ScamStage): number {
-  return SCAM_STAGES.indexOf(stage);
+  return SCAM_STAGE_KEYS.indexOf(stage);
 }
 
 function clamp01(n: number): number {
