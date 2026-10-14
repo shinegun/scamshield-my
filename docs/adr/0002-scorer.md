@@ -52,4 +52,5 @@ The plan said Flash-Lite. On our project, `gemini-2.5-flash-lite` returns 404 in
 - Cutoff: if the Jev scorer is not working by end of Thursday 15 October, the prototype ships Gemini-only and the pitch mentions Jev as planned.
 - The Gemini scorer is still to be built. It answers the same questions from `packages/shared/src/schema.ts`.
 - The speed race is a should-have (ADR 7). It also supplies the deck's benchmarking slide.
+- Each tick the scorer sees the latest lines back to about 600 characters (30–45 s of speech), never fewer than 2. Checked on 14 October by chopping the scripted calls into 94–96 short back-and-forth pieces: Jev and Gemini still caught all 12 red flags and held transfers with any window, but a 2-line window let the chopped innocent call reach a soft warning (Jev, 0.44), where 600 characters kept it at none (0.25).
 - Jev runs in the US. Expect roughly 150–250 ms of extra latency from Malaysia; we score every few seconds, so this is acceptable.
