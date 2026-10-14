@@ -45,6 +45,7 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | `services/pipeline/src/scorers/jev.ts` | Done, 2 tests against a faked API. Run against the real Jev on 14 October: Malay as good as English, 227–364 ms per tick (ADR 2). |
 | `services/pipeline/src/fixtures` | Done. Scripted scam call and normal calls, in Malay and English. |
 | `services/pipeline/src/server.ts`, `session.ts` | Done, tested. WebSocket server on `/call`: session state, a scoring tick per injected line, `risk` messages, transfer hold and release, `clock.skip`. No Firestore yet. |
+| `services/pipeline/Dockerfile`, `deploy.sh` | Done. Builds with Cloud Build and deploys to Cloud Run (see "Deployed pipeline"). |
 | `services/pipeline/src/warnings` | Done, tested. One warning per new action level, written by Gemini 2.5 Flash in Malay or English, with fixed fallback text if Gemini takes over 2.5 s. |
 | `services/pipeline/src/scorers` | Done, tested. Jev, Gemini 2.5 Flash on Vertex AI, and the fallback wrapper (Jev first, Gemini after 800 ms). |
 | `apps/web` | Done for M1, 46 tests. Phone-styled bank app: pick a scripted call, live transcript and risk bar, soft banner and full-screen warnings, transfer hold with a 10 s "this was really me" release. Dashboard route is a placeholder (#15). Run with `pnpm --filter @scamshield/web dev` next to the pipeline. |
@@ -109,6 +110,22 @@ pnpm --filter @scamshield/pipeline start
 ```
 
 It listens on `PORT` (default 8080), WebSocket path `/call`. With `TYPESAFE_API_KEY` in `.env` it scores with Jev and falls back to Gemini; without it, Gemini alone. Gemini needs `gcloud auth application-default login` (see "Set up your machine"). `pnpm --filter @scamshield/pipeline try:gemini` plays the scripted calls through Gemini the way `try:jev` does for Jev.
+
+## Deployed pipeline
+
+The pipeline runs on Cloud Run in `asia-southeast1`: **https://pipeline-842845286251.asia-southeast1.run.app** (WebSocket `wss://pipeline-842845286251.asia-southeast1.run.app/call`). One instance, always on, because call state lives in memory (ADR 8). It runs as the `scamshield-pipeline` service account (Vertex AI and Firestore), and reads the Jev key from Secret Manager (`typesafe-api-key`).
+
+To redeploy after a change, from the repo root:
+
+```bash
+services/pipeline/deploy.sh
+```
+
+To run the local web app against it:
+
+```bash
+VITE_PIPELINE_URL=wss://pipeline-842845286251.asia-southeast1.run.app/call pnpm --filter @scamshield/web dev
+```
 
 ## Try Jev
 

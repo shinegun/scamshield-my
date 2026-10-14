@@ -1,0 +1,11 @@
+# What `gcloud builds submit` leaves out of the upload. Secrets never leave
+# this machine except through Secret Manager.
+.git
+.gitignore
+**/node_modules
+**/dist
+.env
+.env.*
+.claude
+apps
+docs
