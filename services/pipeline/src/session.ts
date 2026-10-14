@@ -17,9 +17,24 @@ import {
 import type { Scorer } from './scorers/types';
 import { writeWarning, type WarningWriter } from './warnings/writer';
 
-// Roughly the 30-60 seconds of speech the live pipeline will send; the same
-// window try-jev.ts used when we tested against Jev.
-const WINDOW_LINES = 2;
+// What the scorer sees each tick: the latest lines back to about 600
+// characters (30-45 s of speech), and never fewer than 2 lines. A real call
+// goes back and forth in short pieces; with a fixed 2-line window a piece like
+// "Did you just make this purchase?" lost its context and an innocent call
+// reached a soft warning, while a 600-character window kept it at none and
+// still caught every red flag in the scam calls (14 October, Jev and Gemini).
+const WINDOW_CHARS = 600;
+const WINDOW_MIN_LINES = 2;
+
+export function recentWindow<T extends { text: string }>(lines: readonly T[]): T[] {
+  let start = lines.length;
+  let chars = 0;
+  while (start > 0 && (chars < WINDOW_CHARS || lines.length - start < WINDOW_MIN_LINES)) {
+    start--;
+    chars += lines[start]!.text.length;
+  }
+  return lines.slice(start);
+}
 
 export interface SessionOptions {
   scorer: Scorer;
@@ -112,7 +127,7 @@ export class CallSession {
         language: started.language,
         atSec: this.atSec(started),
       });
-      const recent = this.lines.slice(-WINDOW_LINES);
+      const recent = recentWindow(this.lines);
       return this.enqueue(() => this.tick(started, recent));
     }
     return this.enqueue(() => this.handleOther(started, message));

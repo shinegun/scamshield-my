@@ -192,7 +192,8 @@ describe('risk loop', () => {
     await client.next('risk');
     await client.next('risk');
     await client.next('risk');
-    expect(seen).toEqual(['caller: a', 'caller: a\ncaller: b', 'caller: b\ncaller: c']);
+    // Short lines all fit in the scoring window (see recentWindow).
+    expect(seen).toEqual(['caller: a', 'caller: a\ncaller: b', 'caller: a\ncaller: b\ncaller: c']);
   });
 
   it('applies the long-call floor after clock.skip', async () => {
