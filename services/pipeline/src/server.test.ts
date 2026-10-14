@@ -11,6 +11,8 @@ import {
 } from '@scamshield/shared';
 import { createServer } from './server';
 import type { Scorer } from './scorers/types';
+import { FALLBACK_WARNINGS } from './warnings/fallbacks';
+import type { WarningInput, WarningWriter } from './warnings/writer';
 
 function decision(scamStage: ScamStage, flags: Partial<FlagScores> = {}): Decision {
   return { scamStage, scamType: 'fake_police', flags: { ...emptySession().peakFlags, ...flags } };
@@ -90,8 +92,8 @@ afterEach(async () => {
   for (const close of closers.splice(0)) await close();
 });
 
-async function setup(scorer: Scorer, now: () => number = () => 1_000_000) {
-  const server = await createServer({ scorer, port: 0, now });
+async function setup(scorer: Scorer, now: () => number = () => 1_000_000, writer?: WarningWriter) {
+  const server = await createServer({ scorer, writer, port: 0, now });
   closers.push(() => server.close());
   const client = await Client.connect(server.port);
   closers.unshift(() => client.close());
@@ -249,5 +251,127 @@ describe('scorer failure', () => {
     expect((await client.next('error')).message).toMatch(/boom/);
     client.send(say('second'));
     expect(await client.next('risk')).toMatchObject({ stage: 'authority_setup' });
+  });
+});
+
+describe('warnings', () => {
+  // Next `n` messages of any kind, in arrival order, after a short settle.
+  async function collect(client: Client): Promise<ServerMessage[]> {
+    await new Promise((r) => setTimeout(r, 50));
+    return (client as unknown as { queue: ServerMessage[] }).queue.splice(0);
+  }
+
+  it('sends one warning per level, each after the risk that raised it', async () => {
+    const { client } = await setup(fakeScorer(MCMC_CALL.map(([d]) => d)));
+    client.send(START);
+    await client.next('session.started');
+    for (const [i] of MCMC_CALL.entries()) client.send(say(`line ${i}`));
+    const messages = (await collect(client)).filter((m) => m.type === 'risk' || m.type === 'warning');
+
+    const warnings = messages.filter((m) => m.type === 'warning');
+    expect(warnings.map((w) => w.action)).toEqual(['soft_warning', 'strong_warning', 'hold_transfers']);
+    expect(warnings[0]).toMatchObject({ language: 'ms-MY', text: FALLBACK_WARNINGS.ms.soft_warning });
+    expect(warnings[0]).not.toHaveProperty('audioUrl');
+
+    // Each warning comes after the first risk carrying its action and before the next risk.
+    const order = messages.map((m) => (m.type === 'risk' ? `risk:${m.action}` : `warning:${m.action}`));
+    expect(order).toEqual([
+      'risk:none',
+      'risk:none',
+      'risk:soft_warning',
+      'warning:soft_warning',
+      'risk:strong_warning',
+      'warning:strong_warning',
+      'risk:strong_warning',
+      'risk:hold_transfers',
+      'warning:hold_transfers',
+    ]);
+  });
+
+  it('sends only the hold warning when a call jumps from none to hold', async () => {
+    const { client } = await setup(
+      fakeScorer([decision('none'), decision('financial_request', { asks_for_transfer: 0.9 })]),
+    );
+    client.send(START);
+    await client.next('session.started');
+    client.send(say('Helo'));
+    client.send(say('Pindahkan duit sekarang'));
+    const warnings = (await collect(client)).filter((m) => m.type === 'warning');
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toMatchObject({ action: 'hold_transfers' });
+  });
+
+  it('sends no warning for an innocent call', async () => {
+    const { client } = await setup(fakeScorer([decision('none')]));
+    client.send(START);
+    await client.next('session.started');
+    for (const t of ['Helo', 'Boleh saya cakap dengan Ali?', 'Terima kasih']) client.send(say(t));
+    const messages = await collect(client);
+    expect(messages.filter((m) => m.type === 'risk')).toHaveLength(3);
+    expect(messages.filter((m) => m.type === 'warning')).toHaveLength(0);
+  });
+
+  it('warns once for an action raised by clock.skip', async () => {
+    const { client } = await setup(fakeScorer([decision('none')]));
+    client.send(START);
+    await client.next('session.started');
+    client.send(say('Helo'));
+    client.send({ type: 'clock.skip', seconds: 3601 });
+    client.send({ type: 'clock.skip', seconds: 10 });
+    const warnings = (await collect(client)).filter((m) => m.type === 'warning');
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toMatchObject({ action: 'soft_warning' });
+  });
+
+  it('sends the writer text, in the call language, without waiting before the risk', async () => {
+    const seen: WarningInput[] = [];
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    const writer: WarningWriter = {
+      async write(input) {
+        seen.push(input);
+        await gate;
+        return `written ${input.action}`;
+      },
+    };
+    const { client } = await setup(fakeScorer(MCMC_CALL.map(([d]) => d)), undefined, writer);
+    client.send({ ...START, language: 'en-MY' });
+    await client.next('session.started');
+    for (const [i] of MCMC_CALL.entries()) client.send(say(`line ${i}`));
+    // All six risks arrive while the first warning is still being written.
+    for (let i = 0; i < MCMC_CALL.length; i++) await client.next('risk');
+    expect(seen.map((s) => s.action)).toEqual(['soft_warning', 'strong_warning', 'hold_transfers']);
+    expect(seen[0]).toMatchObject({
+      language: 'en-MY',
+      scamType: 'fake_police',
+      stage: 'family_pressure',
+      flagsSeen: [
+        'call_transferred_between_agencies',
+        'claims_authority',
+        'victim_framing',
+        'mentions_family_involvement',
+        'demands_secrecy',
+      ],
+    });
+    release();
+    expect((await client.next('warning')).text).toBe('written soft_warning');
+    expect((await client.next('warning')).text).toBe('written strong_warning');
+    expect(await client.next('warning')).toMatchObject({
+      action: 'hold_transfers',
+      language: 'en-MY',
+      text: 'written hold_transfers',
+    });
+  });
+
+  it('falls back to the fixed string when the writer fails', async () => {
+    const writer: WarningWriter = { write: () => Promise.reject(new Error('down')) };
+    const { client } = await setup(fakeScorer([decision('financial_request', { asks_for_transfer: 0.9 })]), undefined, writer);
+    client.send({ ...START, language: 'en-MY' });
+    await client.next('session.started');
+    client.send(say('Transfer now'));
+    expect(await client.next('warning')).toMatchObject({
+      action: 'hold_transfers',
+      text: FALLBACK_WARNINGS.en.hold_transfers,
+    });
   });
 });

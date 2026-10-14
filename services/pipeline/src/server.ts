@@ -4,9 +4,12 @@ import { WebSocketServer, WebSocket } from 'ws';
 import type { ServerMessage } from '@scamshield/shared';
 import type { Scorer } from './scorers/types';
 import { CallSession } from './session';
+import type { WarningWriter } from './warnings/writer';
 
 export interface ServerOptions {
   scorer: Scorer;
+  // Without a writer, warnings use the fixed fallback strings.
+  writer?: WarningWriter;
   // 0 picks a free port (tests).
   port?: number;
   // Injected so tests control the call clock.
@@ -41,6 +44,7 @@ export async function createServer(
   function onConnection(ws: WebSocket): void {
     const session = new CallSession({
       scorer: opts.scorer,
+      writer: opts.writer,
       now,
       send: (message: ServerMessage) => {
         if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(message));
