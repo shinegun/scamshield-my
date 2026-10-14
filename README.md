@@ -55,7 +55,7 @@ pnpm typecheck
 
 ## Set up your machine
 
-We share one Google Cloud project, `psyched-cab-511515-q0` ("Google AI Builder Cup"). Ilham owns it; ask him to add your Google account before you start. The Editor role can be granted from the command line, while Owner has to be an invitation from the console's IAM page.
+We share one Google Cloud project. **It does not exist yet:** Aqil is creating it under his own Google account with his billing, and will replace `PROJECT_ID` below with the real ID. The other person needs to be added to it first; the Editor role can be granted from the command line, while Owner has to be an invitation from the console's IAM page.
 
 Install the two command-line tools (macOS, Homebrew):
 
@@ -71,8 +71,8 @@ Sign in and point everything at the project:
 ```bash
 gcloud auth login
 gcloud auth application-default login
-gcloud config set project psyched-cab-511515-q0
-gcloud auth application-default set-quota-project psyched-cab-511515-q0
+gcloud config set project PROJECT_ID
+gcloud auth application-default set-quota-project PROJECT_ID
 firebase login
 ```
 
@@ -80,7 +80,7 @@ Check that Gemini on Vertex AI answers. This should print a JSON reply with a `c
 
 ```bash
 curl -s -X POST \
-  "https://asia-southeast1-aiplatform.googleapis.com/v1/projects/psyched-cab-511515-q0/locations/asia-southeast1/publishers/google/models/gemini-2.5-flash-lite:generateContent" \
+  "https://asia-southeast1-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/asia-southeast1/publishers/google/models/gemini-2.5-flash-lite:generateContent" \
   -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
   -H "Content-Type: application/json" \
   -d '{"contents":[{"role":"user","parts":[{"text":"Reply with the single word: ok"}]}]}'
@@ -112,7 +112,6 @@ How we use them:
 
 ## Blocked on
 
-- **Billing on the Google Cloud project** (Ilham): the project `psyched-cab-511515-q0` exists with Firestore created in `asia-southeast1` and the Vertex AI, Firestore and Firebase Hosting APIs enabled, but no open billing account is linked. A billing account named "Maybank" was created and shows as closed; its payment method needs fixing in the console before it can be reopened and linked. Until then Gemini calls return `BILLING_DISABLED` and the Speech-to-Text, Secret Manager, Cloud Run, Cloud Build and Artifact Registry APIs cannot be enabled. This blocks the Gemini scorer as well as the deploy.
-- **Firebase not yet added to the project** (Ilham): `firebase projects:addfirebase` returns 403 for the project owner. Add it from the [Firebase console](https://console.firebase.google.com) instead ("Add project", pick the existing Google Cloud project, accept the terms).
-- **Aqil's access and machine** (Ilham, then Aqil): Aqil's Google account is not on the project yet. Once added, Aqil follows "Set up your machine". Issue 1 is done when the Gemini check there works on both machines.
+- **Google Cloud project with billing** (Aqil): Aqil creates a new project under his account, because Ilham's billing account could not be opened. On it: link billing; enable `aiplatform`, `firestore`, `firebase`, `firebasehosting`, `speech`, `secretmanager`, `run`, `cloudbuild` and `artifactregistry` (each `.googleapis.com`); create Firestore in native mode in `asia-southeast1`; add Firebase from the [Firebase console](https://console.firebase.google.com) (the CLI's `projects:addfirebase` returned 403 for us); add Ilham to the project. Then put the project ID into "Set up your machine". This blocks the Gemini scorer as well as the deploy, and issue 1 is done when the Gemini check works on both machines.
+- **Old project to ignore or delete** (Ilham): `psyched-cab-511515-q0` ("Google AI Builder Cup") was set up on 14 October with Firestore and four APIs but never got billing. Nothing depends on it.
 - **Jev docs URL** (Aqil): needed for the Jev scorer's request and response shapes. Cutoff is end of Thursday 15 October (ADR 2).
