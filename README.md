@@ -84,4 +84,3 @@ How we use them:
 ## Blocked on
 
 - **Google Cloud project with billing, Vertex AI and Firebase enabled** (Aqil): none exists yet, and `gcloud` is not installed on Aqil's machine. This blocks the Gemini scorer as well as the deploy.
-- **Permission to use the real scam story** in the video (Aqil to ask his friend).
