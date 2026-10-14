@@ -54,7 +54,8 @@ export function RiskMeter() {
       <div className="risk__stage">
         <div className="risk__stage-head">
           <span className="risk__stage-name">{stageLabel(stage)}</span>
-          {risk && risk.scamType !== 'none' && (
+          {/* Only once the engine acts, so an innocent call shows no scam label. */}
+          {risk && risk.action !== 'none' && risk.scamType !== 'none' && (
             <span className="risk__type">{scamTypeLabel(risk.scamType)}</span>
           )}
         </div>

@@ -46,6 +46,8 @@ export function CallScreen() {
         )}
       </div>
 
+      {/* Banner and pill sit in the flow here; the full-screen overlay is absolute. */}
+      <WarningLayer />
       <RiskMeter />
       <TranscriptView />
 
@@ -56,7 +58,6 @@ export function CallScreen() {
       )}
 
       <BankActionBar />
-      <WarningLayer />
     </div>
   );
 }
