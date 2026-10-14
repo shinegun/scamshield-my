@@ -9,11 +9,14 @@
     "try:jev": "tsx --env-file=../../.env scripts/try-jev.ts"
   },
   "dependencies": {
+    "@google/genai": "^2.29.0",
     "@scamshield/shared": "workspace:*",
-    "@typesafe-ai/sdk": "^0.6.0"
+    "@typesafe-ai/sdk": "^0.6.0",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "@types/ws": "^8.18.2",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
