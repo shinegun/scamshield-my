@@ -40,7 +40,7 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | `packages/shared/src/schema.ts` | Done. Scam stages, scam types and the 13 red-flag questions sent to the scorer. |
 | `packages/shared/src/risk.ts` | Done, 8 tests. Combines flags into a risk score and an action. |
 | `packages/shared/src/events.ts` | Done. WebSocket messages between the bank app and the pipeline. |
-| `services/pipeline/src/jev.ts` | Done, 2 tests against a faked API. Not yet run against the real Jev. |
+| `services/pipeline/src/jev.ts` | Done, 2 tests against a faked API. Run against the real Jev on 14 October: Malay as good as English, 227–364 ms per tick (ADR 2). |
 | `services/pipeline/src/fixtures` | Done. Scripted scam call and normal calls, in Malay and English. |
 | `services/pipeline` (the server) | Not started. Cloud Run service. |
 | `apps/web` | Empty. Bank app, caller simulator and fraud dashboard. |
@@ -63,7 +63,7 @@ Copy `.env.example` to `.env`, set `TYPESAFE_API_KEY`, then:
 pnpm --filter @scamshield/pipeline try:jev
 ```
 
-It plays the scripted calls through Jev in English and in Malay and prints the stage, flags, risk and latency per line. Jev is trained mainly on English, so this is the first thing to check (see ADR 2).
+It plays the scripted calls through Jev in English and in Malay and prints the stage, flags, risk and latency per line. The first run's results are in ADR 2.
 
 ## Next up
 
@@ -84,5 +84,4 @@ How we use them:
 ## Blocked on
 
 - **Google Cloud project with billing, Vertex AI and Firebase enabled** (Aqil): none exists yet, and `gcloud` is not installed on Aqil's machine. This blocks the Gemini scorer as well as the deploy.
-- **Jev in Malay** (Aqil): the Jev scorer is built; run `try:jev` (see "Try Jev") and decide from its Malay results whether Jev stays primary. Cutoff is end of Thursday 15 October (ADR 2).
 - **Permission to use the real scam story** in the video (Aqil to ask his friend).

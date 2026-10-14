@@ -30,6 +30,15 @@ Read from [docs.typesafe.ai](https://docs.typesafe.ai/llms.txt); the agent skill
 - **Choice leans toward the first option.** `none` is first in both lists, so the bias is toward staying quiet.
 - **Cost is negligible:** $0.042 per million input tokens, output free.
 
+## What `try:jev` showed (2026-10-14)
+
+The scripted scam call and three innocent calls, run once in English and once in Malay against `jev-1.13.0`:
+
+- **Malay scores as well as English.** The scam call's stage matched on 6 of 7 lines in both, both reach `hold_transfers` on line 4, and all three innocent calls end at `none` in both. Malay flag probabilities were the same or slightly higher. Jev stays primary for Malay; no translation step.
+- **Latency is 227–364 ms per tick from Malaysia,** well inside the 800 ms timeout.
+- **Two weak spots, the same in both languages.** Line 3 (family pressure) is read as `victim_framing`, though `mentions_family_involvement` is still 0.98. The innocent bank callback gets `claims_authority` at 0.97 and `authority_setup`, but the risk engine keeps it at `none` (risk 0.26), which is the point of ADR 6.
+- **Not yet covered:** Manglish, the Manglish scam script, and more than one innocent line per call. Recheck when the three scripted calls (ADR 5) exist.
+
 ## Consequences
 
 - `services/pipeline/src/jev.ts` is the Jev scorer, built against the docs above.
