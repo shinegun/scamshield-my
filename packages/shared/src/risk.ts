@@ -23,6 +23,10 @@ export const DEFAULT_THRESHOLDS: Thresholds = { soft: 0.4, strong: 0.7, hold: 0.
 const LONG_CALL_SEC = 60 * 60;
 // A flag counts as "seen" in the summary sent back to the model above this.
 const FLAG_SEEN_AT = 0.5;
+// Below this a flag's probability is model noise and adds nothing to risk.
+// Without it, a long innocent call piles up 0.1-0.2 answers on heavily
+// weighted flags ("check your Shopee app" scored asks_to_install_app 0.22).
+export const FLAG_NOISE_FLOOR = 0.3;
 
 // What a call has accumulated so far. Flags keep their peak and the stage
 // never moves backwards, so a calm minute late in a call can't reset it.
@@ -62,7 +66,9 @@ export function flagsSeen(session: SessionRisk): RedFlag[] {
 export function combinedRisk(flags: FlagScores): number {
   let pClean = 1;
   for (const k of RED_FLAG_KEYS) {
-    pClean *= 1 - RED_FLAGS[k].weight * clamp01(flags[k]);
+    const p = clamp01(flags[k]);
+    if (p < FLAG_NOISE_FLOOR) continue;
+    pClean *= 1 - RED_FLAGS[k].weight * p;
   }
   return 1 - pClean;
 }
