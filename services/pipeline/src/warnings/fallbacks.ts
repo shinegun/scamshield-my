@@ -18,7 +18,7 @@ export const FALLBACK_WARNINGS: Record<WarningLanguage, Record<WarningAction, st
     strong_warning:
       'Panggilan ini nampak seperti penipuan. Letakkan telefon dan hubungi bank atau polis melalui nombor rasmi, seperti Pusat Respons Scam Kebangsaan (NSRC) di 997.',
     hold_transfers:
-      'Pemindahan wang dari akaun ini dihentikan sementara untuk melindungi anda. Sila letakkan telefon dan hubungi bank anda atau 997.',
+      'Pemindahan wang dari akaun ini ditahan sementara untuk melindungi anda. Sila letakkan telefon dan hubungi bank anda atau 997.',
   },
   en: {
     soft_warning:

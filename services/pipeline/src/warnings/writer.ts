@@ -46,7 +46,7 @@ const WHAT_TO_DO: Record<WarningAction, string> = {
   strong_warning:
     'Tell them this looks like a scam and to hang up and call their bank or the police on the official number, for example the National Scam Response Centre (NSRC) on 997.',
   hold_transfers:
-    "Tell them transfers from this account are paused for the user's protection and they should hang up.",
+    "Tell them transfers from this account are paused for the user's protection and they should hang up. In Malay, say the transfers are \"ditahan sementara\".",
 };
 
 const SYSTEM_PROMPT = [
