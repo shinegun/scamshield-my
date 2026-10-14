@@ -4,9 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "tsx --env-file-if-exists=../../.env src/index.ts",
+    "dev": "tsx watch --env-file-if-exists=../../.env src/index.ts",
     "test": "vitest run",
     "typecheck": "tsc -p .",
-    "try:jev": "tsx --env-file=../../.env scripts/try-jev.ts"
+    "try:jev": "tsx --env-file=../../.env scripts/try-jev.ts",
+    "try:gemini": "tsx scripts/try-gemini.ts"
   },
   "dependencies": {
     "@google/genai": "^2.29.0",
