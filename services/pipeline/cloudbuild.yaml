@@ -1,0 +1,7 @@
+# Builds the pipeline image from the repo root (see deploy.sh).
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ['build', '-f', 'services/pipeline/Dockerfile', '-t', '${_IMAGE}', '.']
+images: ['${_IMAGE}']
+options:
+  logging: CLOUD_LOGGING_ONLY
