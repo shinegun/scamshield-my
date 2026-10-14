@@ -39,7 +39,8 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | --- | --- |
 | `packages/shared/src/schema.ts` | Done. Scam stages, scam types and the 13 red-flag questions sent to the scorer. |
 | `packages/shared/src/risk.ts` | Done, 8 tests. Combines flags into a risk score and an action. |
-| `packages/shared/src/events.ts` | Done. WebSocket messages between the bank app and the pipeline. |
+| `packages/shared/src/events.ts` | Done. WebSocket messages between the bank app and the pipeline, including transfer attempt, hold and release. |
+| `packages/shared/src/store.ts` | Done. Firestore document shapes: session, risk entry per tick, transfer hold. |
 | `services/pipeline` | Empty. Cloud Run service. |
 | `apps/web` | Empty. Bank app, caller simulator and fraud dashboard. |
 
