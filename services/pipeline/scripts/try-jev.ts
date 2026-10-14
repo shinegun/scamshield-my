@@ -14,7 +14,7 @@ import {
   type CallState,
 } from '@scamshield/shared';
 import { NORMAL_CALLS, SCAM_CALL, type ScriptLine } from '../src/fixtures/reference-call';
-import { JevScorer } from '../src/jev';
+import { JevScorer } from '../src/scorers/jev';
 
 // Roughly the 30-60 seconds of speech the live pipeline will send.
 const WINDOW_LINES = 2;

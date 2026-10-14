@@ -14,7 +14,7 @@ import {
   type NoulQuestion,
   type TypeSafeClientConfig,
 } from '@typesafe-ai/sdk';
-import { STAGE_QUESTION, TYPE_QUESTION, toScorerState, type ScoreResult, type Scorer } from './scorer';
+import { STAGE_QUESTION, TYPE_QUESTION, toScorerState, type ScoreResult, type Scorer } from './types';
 
 const flagQuestions = Object.fromEntries(
   RED_FLAG_KEYS.map((k) => [k, noul(RED_FLAGS[k].question, { true: RED_FLAGS[k].yes })]),
