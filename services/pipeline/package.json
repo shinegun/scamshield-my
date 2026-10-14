@@ -1,0 +1,21 @@
+{
+  "name": "@scamshield/pipeline",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p .",
+    "try:jev": "tsx --env-file=../../.env scripts/try-jev.ts"
+  },
+  "dependencies": {
+    "@scamshield/shared": "workspace:*",
+    "@typesafe-ai/sdk": "^0.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
