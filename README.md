@@ -53,6 +53,47 @@ pnpm test
 pnpm typecheck
 ```
 
+## Set up your machine
+
+We share one Google Cloud project, `psyched-cab-511515-q0` ("Google AI Builder Cup"). Ilham owns it; ask him to add your Google account before you start. The Editor role can be granted from the command line, while Owner has to be an invitation from the console's IAM page.
+
+Install the two command-line tools (macOS, Homebrew):
+
+```bash
+brew install --cask gcloud-cli
+brew install firebase-cli
+```
+
+`firebase-cli` brings its own newer Node. If `node -v` no longer says 22 afterwards, run `brew unlink node`.
+
+Sign in and point everything at the project:
+
+```bash
+gcloud auth login
+gcloud auth application-default login
+gcloud config set project psyched-cab-511515-q0
+gcloud auth application-default set-quota-project psyched-cab-511515-q0
+firebase login
+```
+
+Check that Gemini on Vertex AI answers. This should print a JSON reply with a `candidates` field:
+
+```bash
+curl -s -X POST \
+  "https://asia-southeast1-aiplatform.googleapis.com/v1/projects/psyched-cab-511515-q0/locations/asia-southeast1/publishers/google/models/gemini-2.5-flash-lite:generateContent" \
+  -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+  -H "Content-Type: application/json" \
+  -d '{"contents":[{"role":"user","parts":[{"text":"Reply with the single word: ok"}]}]}'
+```
+
+Where things run:
+
+| Service | Location | Why |
+| --- | --- | --- |
+| Firestore (native mode), Cloud Run, Gemini on Vertex AI | `asia-southeast1` (Singapore) | Closest region to Malaysia. The Firestore location cannot be changed. |
+| Speech-to-Text Chirp 3 | `us` or `eu` multi-region | Chirp 3 is not offered in `asia-southeast1`. |
+| Gemini text-to-speech | `global` | The current preview models are only served from the global endpoint. |
+
 ## Next up
 
 The work from here to submission is tracked as [GitHub issues](https://github.com/shinegun/scamshield-my/issues), grouped into three milestones:
@@ -71,5 +112,7 @@ How we use them:
 
 ## Blocked on
 
-- **Google Cloud project with billing, Vertex AI and Firebase enabled** (Aqil): none exists yet, and `gcloud` is not installed on Aqil's machine. This blocks the Gemini scorer as well as the deploy.
+- **Billing on the Google Cloud project** (Ilham): the project `psyched-cab-511515-q0` exists with Firestore created in `asia-southeast1` and the Vertex AI, Firestore and Firebase Hosting APIs enabled, but no open billing account is linked. A billing account named "Maybank" was created and shows as closed; its payment method needs fixing in the console before it can be reopened and linked. Until then Gemini calls return `BILLING_DISABLED` and the Speech-to-Text, Secret Manager, Cloud Run, Cloud Build and Artifact Registry APIs cannot be enabled. This blocks the Gemini scorer as well as the deploy.
+- **Firebase not yet added to the project** (Ilham): `firebase projects:addfirebase` returns 403 for the project owner. Add it from the [Firebase console](https://console.firebase.google.com) instead ("Add project", pick the existing Google Cloud project, accept the terms).
+- **Aqil's access and machine** (Ilham, then Aqil): Aqil's Google account is not on the project yet. Once added, Aqil follows "Set up your machine". Issue 1 is done when the Gemini check there works on both machines.
 - **Jev docs URL** (Aqil): needed for the Jev scorer's request and response shapes. Cutoff is end of Thursday 15 October (ADR 2).
