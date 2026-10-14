@@ -1,0 +1,164 @@
+.door {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 18px calc(18px + var(--safe-bottom));
+}
+
+.door__title {
+  margin: 4px 0 6px;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+}
+
+.door__lead {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+
+.door__speed {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.door__cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  text-align: left;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  transition: border-color 0.15s, transform 0.1s;
+}
+
+.card:hover {
+  border-color: var(--accent);
+}
+
+.card:active {
+  transform: scale(0.99);
+}
+
+.card__top,
+.card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.card__kind {
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.card__kind--scam {
+  color: var(--risk-hold);
+  background: rgba(236, 59, 75, 0.14);
+}
+
+.card__kind--safe {
+  color: var(--risk-none);
+  background: rgba(47, 191, 113, 0.14);
+}
+
+.card__len {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.card__title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.card__summary {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+
+.card__expect {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.card__play {
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.door__foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.door__foot p {
+  margin: 0;
+}
+
+.door__dash {
+  display: none;
+  color: var(--text-dim);
+}
+
+@media (max-width: 480px) {
+  .door__dash {
+    display: inline;
+  }
+}
+
+.speed {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--bg-raised);
+}
+
+.speed__option {
+  min-width: 40px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.speed__option[aria-pressed='true'] {
+  background: var(--accent);
+  color: #fff;
+}
