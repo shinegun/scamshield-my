@@ -14,12 +14,24 @@ export interface ServerOptions {
   port?: number;
   // Injected so tests control the call clock.
   now?: () => number;
+  // Caps for a public link (#18): calls open at once, and how long one call
+  // may last by the wall clock (clock.skip does not count towards it).
+  maxCalls?: number;
+  maxCallMs?: number;
 }
+
+export const DEFAULT_MAX_CALLS = 5;
+export const DEFAULT_MAX_CALL_MS = 5 * 60 * 1000;
+// A transcript line is a sentence or two; nothing legitimate comes near this.
+const MAX_MESSAGE_BYTES = 16 * 1024;
 
 export async function createServer(
   opts: ServerOptions,
 ): Promise<{ port: number; close(): Promise<void> }> {
   const now = opts.now ?? Date.now;
+  const maxCalls = opts.maxCalls ?? DEFAULT_MAX_CALLS;
+  const maxCallMs = opts.maxCallMs ?? DEFAULT_MAX_CALL_MS;
+  let openCalls = 0;
 
   const http = createHttpServer((req, res) => {
     // Cloud Run health check.
@@ -30,7 +42,7 @@ export async function createServer(
     }
   });
 
-  const wss = new WebSocketServer({ noServer: true });
+  const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES });
   http.on('upgrade', (req, socket, head) => {
     const path = new URL(req.url ?? '/', 'http://localhost').pathname;
     if (path !== '/call') {
@@ -41,7 +53,29 @@ export async function createServer(
     wss.handleUpgrade(req, socket, head, (ws) => onConnection(ws));
   });
 
+  function refuse(ws: WebSocket, message: string): void {
+    ws.send(JSON.stringify({ type: 'error', message } satisfies ServerMessage));
+    ws.close(1013, 'limit');
+  }
+
   function onConnection(ws: WebSocket): void {
+    if (openCalls >= maxCalls) {
+      refuse(ws, `Too many calls right now (limit ${maxCalls}). Please try again in a minute.`);
+      return;
+    }
+    openCalls++;
+    const limitTimer = setTimeout(() => {
+      session.dispose();
+      refuse(ws, `This demo call reached its ${Math.round(maxCallMs / 60000)}-minute limit and was ended.`);
+    }, maxCallMs);
+    let counted = true;
+    const release = () => {
+      clearTimeout(limitTimer);
+      if (counted) openCalls--;
+      counted = false;
+      session.dispose();
+    };
+
     const session = new CallSession({
       scorer: opts.scorer,
       writer: opts.writer,
@@ -56,8 +90,8 @@ export async function createServer(
       if (isBinary) return;
       void session.receive(data.toString());
     });
-    ws.on('close', () => session.dispose());
-    ws.on('error', () => session.dispose());
+    ws.on('close', release);
+    ws.on('error', release);
   }
 
   await new Promise<void>((resolve, reject) => {

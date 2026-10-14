@@ -85,9 +85,12 @@ export function CallProvider({ children }: { children: ReactNode }) {
       teardown(true);
       dispatch({ type: 'start', script });
 
+      // The pipeline says why before it closes a call (e.g. a call limit, #18).
+      let lastServerError: string | undefined;
       const socket: CallSocket = connectCallSocket(PIPELINE_URL, {
         onMessage(message) {
           if (socketRef.current !== socket) return;
+          lastServerError = message.type === 'error' ? message.message : undefined;
           dispatch({ type: 'server', message });
           if (message.type === 'session.started') {
             const player = new ReplayPlayer(script.lines, {
@@ -113,7 +116,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
         onClose() {
           if (socketRef.current !== socket) return;
           playerRef.current?.cancel();
-          dispatch({ type: 'connection-error', message: 'The connection to the pipeline closed' });
+          dispatch({ type: 'connection-error', message: lastServerError ?? 'The connection to the pipeline closed' });
         },
       });
       socketRef.current = socket;
