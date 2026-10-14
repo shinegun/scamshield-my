@@ -49,6 +49,7 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | `services/pipeline/src/warnings` | Done, tested. One warning per new action level, written by Gemini 2.5 Flash in Malay or English, with fixed fallback text if Gemini takes over 2.5 s. |
 | `services/pipeline/src/scorers` | Done, tested. Jev, Gemini 2.5 Flash on Vertex AI, and the fallback wrapper (Jev first, Gemini after 800 ms). |
 | `apps/web` | Done for M1, 46 tests. Phone-styled bank app: pick a scripted call, live transcript and risk bar, soft banner and full-screen warnings, transfer hold with a 10 s "this was really me" release. Dashboard route is a placeholder (#15). Run with `pnpm --filter @scamshield/web dev` next to the pipeline. |
+| `firebase.json`, `apps/web/deploy.sh` | Done. Firebase Hosting for the web app (see "Live demo"). |
 
 ## Run it
 
@@ -110,6 +111,16 @@ pnpm --filter @scamshield/pipeline start
 ```
 
 It listens on `PORT` (default 8080), WebSocket path `/call`. With `TYPESAFE_API_KEY` in `.env` it scores with Jev and falls back to Gemini; without it, Gemini alone. Gemini needs `gcloud auth application-default login` (see "Set up your machine"). `pnpm --filter @scamshield/pipeline try:gemini` plays the scripted calls through Gemini the way `try:jev` does for Jev.
+
+## Live demo
+
+**https://scamshield-my-511604.web.app** — the web app on Firebase Hosting, talking to the pipeline on Cloud Run. To publish a new version of the web app, from the repo root:
+
+```bash
+apps/web/deploy.sh
+```
+
+It reads the live pipeline URL from Cloud Run, builds the app against it and runs `firebase deploy --only hosting`.
 
 ## Deployed pipeline
 
