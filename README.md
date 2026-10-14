@@ -41,13 +41,13 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | `packages/shared/src/risk.ts` | Done, 8 tests. Combines flags into a risk score and an action. |
 | `packages/shared/src/events.ts` | Done. WebSocket messages between the bank app and the pipeline, including transfer attempt, hold and release. |
 | `packages/shared/src/store.ts` | Done. Firestore document shapes: session, risk entry per tick, transfer hold. |
-| `packages/shared/src/scripts` | Done, 4 tests. The three replay calls: Malay scam, Manglish scam, innocent bank check. |
+| `packages/shared/src/scripts` | Done, 4 tests. The three replay calls, drafted with ILMU (`packages/shared/tools/draft-calls.ts`): Malay and Manglish scam calls of 142 s each (22 lines, line for line), and a 50 s innocent bank check. |
 | `services/pipeline/src/scorers/jev.ts` | Done, 2 tests against a faked API. Run against the real Jev on 14 October: Malay as good as English, 227–364 ms per tick (ADR 2). |
 | `services/pipeline/src/fixtures` | Done. Scripted scam call and normal calls, in Malay and English. |
 | `services/pipeline/src/server.ts`, `session.ts` | Done, tested. WebSocket server on `/call`: session state, a scoring tick per injected line, `risk` messages, transfer hold and release, `clock.skip`. No Firestore yet. |
 | `services/pipeline/src/warnings` | Done, tested. One warning per new action level, written by Gemini 2.5 Flash in Malay or English, with fixed fallback text if Gemini takes over 2.5 s. |
 | `services/pipeline/src/scorers` | Done, tested. Jev, Gemini 2.5 Flash on Vertex AI, and the fallback wrapper (Jev first, Gemini after 800 ms). |
-| `apps/web` | Empty. Bank app, caller simulator and fraud dashboard. |
+| `apps/web` | Done for M1, 46 tests. Phone-styled bank app: pick a scripted call, live transcript and risk bar, soft banner and full-screen warnings, transfer hold with a 10 s "this was really me" release. Dashboard route is a placeholder (#15). Run with `pnpm --filter @scamshield/web dev` next to the pipeline. |
 
 ## Run it
 

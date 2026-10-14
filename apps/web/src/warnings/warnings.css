@@ -1,0 +1,186 @@
+/* Soft banner and the reopen pill, in the call screen's flow between the
+   toolbar and the risk card, so they never cover the call controls. */
+.warn-top {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 0 12px;
+  pointer-events: none;
+}
+.warn-top:has(> :not(:empty)) {
+  padding-bottom: 8px;
+}
+
+.warn-top > * {
+  pointer-events: none;
+}
+.warn-top button,
+.warn-banner {
+  pointer-events: auto;
+}
+
+.warn-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 8px 10px 12px;
+  border-radius: 14px;
+  background: var(--risk-soft);
+  color: #2b1d00;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  animation: warn-slide-in 0.35s ease-out;
+}
+
+.warn-banner__icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #2b1d00;
+  color: var(--risk-soft);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.warn-banner__text {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.warn-banner__close {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(43, 29, 0, 0.12);
+  color: #2b1d00;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.warn-pill {
+  align-self: center;
+  min-height: 30px;
+  padding: 4px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--risk-hold);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+@keyframes warn-slide-in {
+  from {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Full-screen warning, covering the call screen inside the phone frame. */
+.warn-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 22px 24px;
+  background: #c92c3b;
+  color: #fff;
+  animation: warn-fade-in 0.25s ease-out;
+}
+
+.warn-overlay[data-action='hold_transfers'] {
+  background: #7a0f1d;
+}
+
+.warn-overlay__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.warn-overlay__icon {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  color: #c92c3b;
+  font-size: 40px;
+  font-weight: 800;
+}
+
+.warn-overlay[data-action='hold_transfers'] .warn-overlay__icon {
+  color: #7a0f1d;
+}
+
+.warn-overlay__title {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+.warn-overlay__text {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.warn-overlay__secondary {
+  margin: 4px 0 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.warn-overlay__dismiss {
+  flex: none;
+  min-height: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: #fff;
+  color: #7a0f1d;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+@keyframes warn-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .warn-banner,
+  .warn-overlay {
+    animation: none;
+  }
+}

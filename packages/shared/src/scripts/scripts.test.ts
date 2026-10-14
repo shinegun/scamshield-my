@@ -25,8 +25,8 @@ describe('scripted calls', () => {
     const ranks = script.lines.map((l) => STAGE_ORDER.indexOf(l.stage));
     expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
     expect(new Set(script.lines.map((l) => l.stage))).toEqual(new Set(STAGE_ORDER.filter((s) => s !== 'none')));
-    expect(scriptDurationSec(script)).toBeGreaterThanOrEqual(70);
-    expect(scriptDurationSec(script)).toBeLessThanOrEqual(90);
+    expect(scriptDurationSec(script)).toBeGreaterThanOrEqual(130);
+    expect(scriptDurationSec(script)).toBeLessThanOrEqual(190);
   });
 
   it('keeps the two scam calls line for line, so they score alike', () => {

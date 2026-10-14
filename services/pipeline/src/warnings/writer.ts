@@ -46,7 +46,7 @@ const WHAT_TO_DO: Record<WarningAction, string> = {
   strong_warning:
     'Tell them this looks like a scam and to hang up and call their bank or the police on the official number, for example the National Scam Response Centre (NSRC) on 997.',
   hold_transfers:
-    "Tell them transfers from this account are paused for the user's protection and they should hang up. In Malay, say the transfers are \"ditahan sementara\".",
+    "Tell them transfers from this account are paused for the user's protection and they should hang up.",
 };
 
 const SYSTEM_PROMPT = [
@@ -79,6 +79,10 @@ export function buildWarningPrompt(input: WarningInput): string {
     `How far the call has gone: ${input.stage} (${SCAM_STAGES[input.stage]})`,
     `Signs detected so far, each a question that was answered yes:\n${signs}`,
     `What to do: ${WHAT_TO_DO[input.action]}`,
+    // Malay wording a native reader preferred for the hold; only for Malay.
+    ...(input.action === 'hold_transfers' && warningLanguage(input.language) === 'ms'
+      ? ['Say the transfers are "ditahan sementara".']
+      : []),
     'Write the warning now.',
   ].join('\n');
 }
