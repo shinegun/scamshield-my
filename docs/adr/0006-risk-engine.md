@@ -12,7 +12,7 @@ The scorer returns a scam stage, a scam type and a probability for each of 13 re
 `packages/shared/src/risk.ts` owns every action. The model never chooses one.
 
 - **Memory.** Each flag keeps its peak probability for the call, and the stage never moves backwards.
-- **Score.** Flags combine by noisy-OR: `risk = 1 − Π(1 − weight × probability)`. Several weak flags add up; one weak flag alone stays low.
+- **Score.** Flags combine by noisy-OR: `risk = 1 − Π(1 − weight × probability)`. Several weak flags add up; one weak flag alone stays low. A probability under 0.3 is treated as model noise and adds nothing (added 2026-10-14: the 50-second innocent bank call reached a soft warning from 0.1–0.2 answers piling up on heavily weighted flags).
 - **Thresholds.** Soft warning at 0.40, strong warning at 0.70, transfers held at 0.85. Tunable per bank.
 - **Floors.** Identity requested: at least a strong warning. Money requested: transfers held. Unknown number for over an hour: at least a soft warning.
 

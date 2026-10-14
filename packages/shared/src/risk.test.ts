@@ -34,6 +34,20 @@ describe('normal calls stay quiet', () => {
     expect(decideAction(session, { durationSec: 90, callerKnown: false }).action).toBe('none');
   });
 
+  it('ignores a long bank call where only noise adds up', () => {
+    // Peak flags Jev gave the innocent script's card check on 14 October.
+    const session = absorb(
+      emptySession(),
+      decision('none', {
+        claims_authority: 0.95,
+        user_seems_compliant: 0.9,
+        asks_to_install_app: 0.22,
+        victim_framing: 0.18,
+      }),
+    );
+    expect(decideAction(session, unknownCaller).action).toBe('none');
+  });
+
   it('ignores a long call with a saved contact', () => {
     expect(decideAction(emptySession(), { durationSec: 3 * 3600, callerKnown: true }).action).toBe('none');
   });
