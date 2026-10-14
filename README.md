@@ -42,9 +42,10 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | `packages/shared/src/events.ts` | Done. WebSocket messages between the bank app and the pipeline, including transfer attempt, hold and release. |
 | `packages/shared/src/store.ts` | Done. Firestore document shapes: session, risk entry per tick, transfer hold. |
 | `packages/shared/src/scripts` | Done, 4 tests. The three replay calls: Malay scam, Manglish scam, innocent bank check. |
-| `services/pipeline/src/jev.ts` | Done, 2 tests against a faked API. Run against the real Jev on 14 October: Malay as good as English, 227–364 ms per tick (ADR 2). |
+| `services/pipeline/src/scorers/jev.ts` | Done, 2 tests against a faked API. Run against the real Jev on 14 October: Malay as good as English, 227–364 ms per tick (ADR 2). |
 | `services/pipeline/src/fixtures` | Done. Scripted scam call and normal calls, in Malay and English. |
-| `services/pipeline` (the server) | Not started. Cloud Run service. |
+| `services/pipeline/src/server.ts`, `session.ts` | Done, tested. WebSocket server on `/call`: session state, a scoring tick per injected line, `risk` messages, transfer hold and release, `clock.skip`. No Firestore or warnings yet. |
+| `services/pipeline/src/scorers` | Done, tested. Jev, Gemini 2.5 Flash on Vertex AI, and the fallback wrapper (Jev first, Gemini after 800 ms). |
 | `apps/web` | Empty. Bank app, caller simulator and fraud dashboard. |
 
 ## Run it
@@ -99,6 +100,14 @@ Where things run:
 | Gemini 2.5 Flash-Lite, 2.5 Pro, 3 Flash (preview), 3.1 Flash-Lite | `global` | Checked on 14 October: these return 404 in `asia-southeast1` but answer on the global endpoint. |
 | Speech-to-Text Chirp 3 | `us` or `eu` multi-region | Chirp 3 is not offered in `asia-southeast1`. |
 | Gemini text-to-speech | `global` | The current preview models are only served from the global endpoint. |
+
+## Run the pipeline
+
+```bash
+pnpm --filter @scamshield/pipeline start
+```
+
+It listens on `PORT` (default 8080), WebSocket path `/call`. With `TYPESAFE_API_KEY` in `.env` it scores with Jev and falls back to Gemini; without it, Gemini alone. Gemini needs `gcloud auth application-default login` (see "Set up your machine"). `pnpm --filter @scamshield/pipeline try:gemini` plays the scripted calls through Gemini the way `try:jev` does for Jev.
 
 ## Try Jev
 
