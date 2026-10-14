@@ -41,6 +41,7 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | `packages/shared/src/risk.ts` | Done, 8 tests. Combines flags into a risk score and an action. |
 | `packages/shared/src/events.ts` | Done. WebSocket messages between the bank app and the pipeline, including transfer attempt, hold and release. |
 | `packages/shared/src/store.ts` | Done. Firestore document shapes: session, risk entry per tick, transfer hold. |
+| `packages/shared/src/scripts` | Done, 4 tests. The three replay calls: Malay scam, Manglish scam, innocent bank check. |
 | `services/pipeline/src/scorers/jev.ts` | Done, 2 tests against a faked API. Run against the real Jev on 14 October: Malay as good as English, 227–364 ms per tick (ADR 2). |
 | `services/pipeline/src/fixtures` | Done. Scripted scam call and normal calls, in Malay and English. |
 | `services/pipeline/src/server.ts`, `session.ts` | Done, tested. WebSocket server on `/call`: session state, a scoring tick per injected line, `risk` messages, transfer hold and release, `clock.skip`. No Firestore yet. |
@@ -57,6 +58,49 @@ pnpm install
 pnpm test
 pnpm typecheck
 ```
+
+## Set up your machine
+
+We share one Google Cloud project, `scamshield-my-511604`. It is on Aqil's Google account and billing, and both of us are Owners. Firebase is added to it and Firestore has a `(default)` database. Anyone new needs to be added first; the Editor role can be granted from the command line, while Owner has to be an invitation from the console's IAM page.
+
+Install the two command-line tools (macOS, Homebrew):
+
+```bash
+brew install --cask gcloud-cli
+brew install firebase-cli
+```
+
+`firebase-cli` brings its own newer Node. If `node -v` no longer says 22 afterwards, run `brew unlink node`.
+
+Sign in and point everything at the project:
+
+```bash
+gcloud auth login
+gcloud auth application-default login
+gcloud config set project scamshield-my-511604
+gcloud auth application-default set-quota-project scamshield-my-511604
+firebase login
+```
+
+Check that Gemini on Vertex AI answers. This should print a JSON reply with a `candidates` field:
+
+```bash
+curl -s -X POST \
+  "https://asia-southeast1-aiplatform.googleapis.com/v1/projects/scamshield-my-511604/locations/asia-southeast1/publishers/google/models/gemini-2.5-flash:generateContent" \
+  -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+  -H "Content-Type: application/json" \
+  -d '{"contents":[{"role":"user","parts":[{"text":"Reply with the single word: ok"}]}]}'
+```
+
+Where things run:
+
+| Service | Location | Why |
+| --- | --- | --- |
+| Firestore (native mode, `(default)` database), Cloud Run | `asia-southeast1` (Singapore) | Closest region to Malaysia. The Firestore location cannot be changed. |
+| Gemini 2.5 Flash on Vertex AI | `asia-southeast1` (Singapore) | Checked on 14 October: the only Gemini model we tried that answers here. |
+| Gemini 2.5 Flash-Lite, 2.5 Pro, 3 Flash (preview), 3.1 Flash-Lite | `global` | Checked on 14 October: these return 404 in `asia-southeast1` but answer on the global endpoint. |
+| Speech-to-Text Chirp 3 | `us` or `eu` multi-region | Chirp 3 is not offered in `asia-southeast1`. |
+| Gemini text-to-speech | `global` | The current preview models are only served from the global endpoint. |
 
 ## Run the pipeline
 
@@ -94,4 +138,5 @@ How we use them:
 
 ## Blocked on
 
-- **Google Cloud project with billing, Vertex AI and Firebase enabled** (Aqil): none exists yet, and `gcloud` is not installed on Aqil's machine. This blocks the Gemini scorer as well as the deploy.
+- **Gemini check on Ilham's machine** (Ilham): the project `scamshield-my-511604` is set up (billing, the nine APIs, Firestore `(default)` in `asia-southeast1`, Firebase, Ilham as Owner) and the Gemini check answers on Aqil's machine. Issue 1 is done when it also answers on Ilham's.
+- **Old project to ignore or delete** (Ilham): `psyched-cab-511515-q0` ("Google AI Builder Cup") was set up on 14 October with Firestore and four APIs but never got billing. Nothing depends on it.
