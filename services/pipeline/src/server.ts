@@ -10,6 +10,8 @@ import type { WarningSpeech } from './warnings/speech';
 
 export interface ServerOptions {
   scorer: Scorer;
+  // Scorers the race panel compares, in addition to the call's own scorer.
+  racers?: Scorer[];
   // Without a writer, warnings use the fixed fallback strings.
   writer?: WarningWriter;
   // Spoken clips for strong and hold warnings; without one they are silent.
@@ -84,6 +86,7 @@ export async function createServer(
 
     const session = new CallSession({
       scorer: opts.scorer,
+      racers: opts.racers,
       writer: opts.writer,
       speech: opts.speech,
       store: opts.store,

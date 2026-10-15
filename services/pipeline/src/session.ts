@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import {
   ACTIONS,
   absorb,
+  combinedRisk,
   decideAction,
   emptySession,
   flagsSeen,
@@ -11,6 +12,7 @@ import {
   type RiskEntryDoc,
   type SessionDoc,
   type ClientMessage,
+  type RaceEntry,
   type ScamType,
   type ScorerName,
   type ServerMessage,
@@ -41,8 +43,14 @@ export function recentWindow<T extends { text: string }>(lines: readonly T[]): T
   return lines.slice(start);
 }
 
+const RACE_MAX_CHARS = 2000;
+const RACE_TIMEOUT_MS = 10_000;
+const RACE_ORDER: ScorerName[] = ['jev', 'gemini'];
+
 export interface SessionOptions {
   scorer: Scorer;
+  // Scorers the race panel compares, each called on its own (no fallback).
+  racers?: Scorer[];
   // Writes the warning text; without one the fixed fallback strings are used.
   writer?: WarningWriter;
   // Spoken clips for strong and hold warnings; without one warnings are silent.
@@ -119,6 +127,9 @@ export class CallSession {
       return Promise.resolve();
     }
 
+    if (message.type === 'race.run') {
+      return this.race(message);
+    }
     if (message.type === 'session.start') {
       if (this.started) this.error('Session already started');
       else this.start(message);
@@ -147,6 +158,74 @@ export class CallSession {
       return this.enqueue(() => this.tick(started, recent));
     }
     return this.enqueue(() => this.handleOther(started, message));
+  }
+
+  private raceRunning = false;
+
+  // Race panel: works with or without a started call and leaves its state alone.
+  private async race(message: Extract<ClientMessage, { type: 'race.run' }>): Promise<void> {
+    if (this.raceRunning) return this.error('A race is already running');
+    if (message.text.length > RACE_MAX_CHARS) {
+      return this.error(`race.run: text is over ${RACE_MAX_CHARS} characters`);
+    }
+    const racers = this.opts.racers ?? [];
+    if (racers.length === 0) return this.error('No scorers are set up for a race');
+    this.raceRunning = true;
+    try {
+      const state: CallState = {
+        recentTranscript: message.text,
+        flagsSeenSoFar: [],
+        stageReached: 'none',
+        handoffCount: 0,
+        language: message.language,
+        callerKnown: false,
+        callerInternational: false,
+        durationSec: 0,
+        bankAppOpen: false,
+        transferScreenOpen: false,
+      };
+      const order = (r: Scorer) => RACE_ORDER.indexOf(r.name);
+      const entries = await Promise.all(
+        [...racers].sort((a, b) => order(a) - order(b)).map((r) => this.raceOne(r, state)),
+      );
+      if (!this.ended) this.opts.send({ type: 'race.result', text: message.text, entries });
+    } finally {
+      this.raceRunning = false;
+    }
+  }
+
+  private async raceOne(scorer: Scorer, state: CallState): Promise<RaceEntry> {
+    const started = performance.now();
+    const ctl = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timedOut = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        reject(new Error(`${scorer.name} timed out after ${RACE_TIMEOUT_MS / 1000} s`));
+        ctl.abort();
+      }, RACE_TIMEOUT_MS);
+    });
+    const run = scorer.score(state, ctl.signal);
+    run.catch(() => {});
+    try {
+      const r = await Promise.race([run, timedOut]);
+      return {
+        scorer: scorer.name,
+        model: r.model,
+        ok: true,
+        latencyMs: r.latencyMs,
+        decision: r.decision,
+        risk: combinedRisk(r.decision.flags),
+      };
+    } catch (err) {
+      return {
+        scorer: scorer.name,
+        ok: false,
+        latencyMs: Math.round(performance.now() - started),
+        error: errorText(err),
+      };
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   // The socket went away without session.end.
@@ -488,6 +567,10 @@ function parseClientMessage(value: unknown): ClientMessage {
       }
       break;
     case 'session.end':
+      break;
+    case 'race.run':
+      if (typeof m.text !== 'string') throw bad('text');
+      if (typeof m.language !== 'string') throw bad('language');
       break;
     default:
       throw new Error(`Unknown message type: ${String(m.type)}`);
