@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { DEFAULT_THRESHOLDS, type Action } from '@scamshield/shared';
 import { buildChart } from '../dashboard/view';
 import { useCall } from './CallProvider';
@@ -25,6 +26,13 @@ const DOT_TEXT: Record<Action, string> = {
 export function InspectorPanel() {
   const { risk, riskHistory, script } = useCall();
   const view = inspect(risk, riskHistory, langOf(script?.language));
+  // The Heard list scrolls on short screens; keep the newest signal in view.
+  const heardRef = useRef<HTMLUListElement>(null);
+  const heardCount = view.heard.length;
+  useEffect(() => {
+    const list = heardRef.current;
+    if (list) list.scrollTop = list.scrollHeight;
+  }, [heardCount]);
   const chart = buildChart(view.points, 860, 140);
   const last = chart.dots[chart.dots.length - 1];
   const shownMore = view.notYet.length - MAX_NOT_YET;
@@ -106,7 +114,7 @@ export function InspectorPanel() {
       <div className="insp__cols">
         <section>
           <h3 className="insp__h">Heard</h3>
-          <ul className="insp__group">
+          <ul className="insp__group" ref={heardRef}>
             {view.heard.length === 0 && (
               <li className="insp__row insp__row--muted">
                 <span>Nothing yet</span>

@@ -1,5 +1,7 @@
 .desk {
-  min-height: 100dvh;
+  /* Exactly one viewport tall: the page never scrolls (judges' laptops are
+     often 768 px tall); long lists scroll inside their own boxes. */
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   background: var(--page-bg);
@@ -39,8 +41,10 @@
   display: grid;
   grid-template-columns: 460px minmax(0, 1fr);
   gap: 40px;
+  grid-template-rows: minmax(0, 1fr);
   padding: 32px 40px;
   min-height: 0;
+  overflow: auto;
 }
 .desk__phone .stage {
   min-height: 0;
