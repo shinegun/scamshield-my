@@ -66,7 +66,7 @@ export function warningStrings(action: OverlayWarning['action'], language: strin
       : ms
         ? 'Amaran: kemungkinan penipuan'
         : 'Warning: this looks like a scam',
-    dismiss: ms ? 'Saya faham' : 'I understand',
+    dismiss: ms ? 'Teruskan panggilan' : 'Continue call',
     pill: ms ? 'Amaran penipuan' : 'Scam warning',
     secondary: hold ? NSRC_LINE : undefined,
   };

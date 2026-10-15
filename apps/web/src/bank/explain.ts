@@ -70,9 +70,17 @@ export function holdExplanation(
 export interface HoldStrings {
   title: string;
   body(amount: string, toAccount: string, balance: string): string;
-  looksLike: string;
-  noticed: string;
-  pausedWhileRisky: string;
+  // Held screen, iOS grouped layout.
+  heldTitle: string;
+  back: string;
+  stillIn: string;
+  // "You were on a call that looked like a fake police scam ...", scam label optional.
+  because(scamLabel?: string): string;
+  transferSection: string;
+  to: string;
+  reason: string;
+  noticedSection: string;
+  callCentre: string;
   cancel: string;
   reallyMe: string;
   pausedNotice: string;
@@ -83,10 +91,17 @@ const HOLD_STRINGS: Record<Lang, HoldStrings> = {
     title: 'Transfer held to protect you',
     body: (amount, to, balance) =>
       `We stopped ${amount} to ${to} because this looks like it could be part of a scam. Your balance has not changed: ${balance}.`,
-    looksLike: 'This call looks like:',
-    noticed: 'What we noticed on this call:',
-    pausedWhileRisky: 'Transfers are paused while this call looks risky.',
-    cancel: 'Cancel transfer',
+    heldTitle: 'Transfer paused',
+    back: 'Accounts',
+    stillIn: 'Still in your Savings',
+    because: (label) =>
+      `You were on a call that looked like a ${label ? `${label.toLowerCase()} ` : ''}scam when this transfer was made, so we didn't send it.`,
+    transferSection: 'TRANSFER',
+    to: 'To',
+    reason: 'Reason',
+    noticedSection: 'WHAT WE NOTICED',
+    callCentre: 'Call Scam Response Centre (997)',
+    cancel: 'Cancel Transfer',
     reallyMe: 'This was really me',
     pausedNotice: 'Transfers are paused during this call.',
   },
@@ -94,10 +109,17 @@ const HOLD_STRINGS: Record<Lang, HoldStrings> = {
     title: 'Pindahan ditahan untuk melindungi anda',
     body: (amount, to, balance) =>
       `Kami menahan pindahan ${amount} ke ${to} kerana ia mungkin sebahagian daripada penipuan. Baki akaun anda tidak berubah: ${balance}.`,
-    looksLike: 'Panggilan ini kelihatan seperti:',
-    noticed: 'Apa yang kami perhatikan dalam panggilan ini:',
-    pausedWhileRisky: 'Pindahan wang ditahan selagi panggilan ini kelihatan berisiko.',
-    cancel: 'Batalkan pindahan',
+    heldTitle: 'Pindahan ditahan',
+    back: 'Akaun',
+    stillIn: 'Masih dalam akaun Simpanan anda',
+    because: (label) =>
+      `Anda sedang membuat panggilan yang kelihatan seperti penipuan ${label ? `${label.toLowerCase()} ` : ''}semasa pindahan ini dibuat, jadi kami tidak menghantarnya.`,
+    transferSection: 'PINDAHAN',
+    to: 'Kepada',
+    reason: 'Sebab',
+    noticedSection: 'APA YANG KAMI PERHATIKAN',
+    callCentre: 'Hubungi Pusat Respons Scam (997)',
+    cancel: 'Batalkan Pindahan',
     reallyMe: 'Ini memang saya',
     pausedNotice: 'Pindahan wang ditahan sepanjang panggilan ini.',
   },
