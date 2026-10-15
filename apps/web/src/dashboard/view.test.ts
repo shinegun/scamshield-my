@@ -12,6 +12,14 @@ import {
 
 const base = { status: 'live', risk: 0.72, action: 'strong_warning', peakAction: 'hold_transfers', updatedAtMs: 100 };
 
+describe('flagLabel', () => {
+  it('capitalises acronyms', () => {
+    expect(flagLabel('asks_for_otp_or_tac')).toBe('Asks for OTP or TAC');
+    expect(flagLabel('asks_for_ic_or_selfie')).toBe('Asks for IC or selfie');
+    expect(flagLabel('claims_authority')).toBe('Claims authority');
+  });
+});
+
 describe('toSessionView', () => {
   it('maps a full document', () => {
     const v = toSessionView('a', {

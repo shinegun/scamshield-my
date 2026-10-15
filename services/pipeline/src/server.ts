@@ -9,6 +9,8 @@ import type { WarningWriter } from './warnings/writer';
 
 export interface ServerOptions {
   scorer: Scorer;
+  // Scorers the race panel compares, in addition to the call's own scorer.
+  racers?: Scorer[];
   // Without a writer, warnings use the fixed fallback strings.
   writer?: WarningWriter;
   // Where calls are recorded; without one nothing is stored.
@@ -81,6 +83,7 @@ export async function createServer(
 
     const session = new CallSession({
       scorer: opts.scorer,
+      racers: opts.racers,
       writer: opts.writer,
       store: opts.store,
       now,

@@ -24,8 +24,13 @@ const toFlags = (v: unknown): RedFlag[] =>
   Array.isArray(v) ? v.filter((f): f is RedFlag => (RED_FLAG_KEYS as readonly unknown[]).includes(f)) : [];
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
+const FLAG_ACRONYMS = new Set(['ic', 'otp', 'tac']);
+
 export function flagLabel(flag: string): string {
-  const text = flag.replace(/_/g, ' ');
+  const text = flag
+    .split('_')
+    .map((w) => (FLAG_ACRONYMS.has(w) ? w.toUpperCase() : w))
+    .join(' ');
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 

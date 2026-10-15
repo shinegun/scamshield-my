@@ -19,8 +19,15 @@ const useFirestore = Boolean(process.env.K_SERVICE) || process.env.STORE === 'fi
 const store = useFirestore ? new FirestoreCallStore() : new NoopCallStore();
 console.log(`call store: ${useFirestore ? 'firestore' : 'none (noop)'}`);
 
+// The race panel calls each scorer alone with a 10 s limit, so Jev's client
+// timeout is raised to match.
+const racers: Scorer[] = process.env.TYPESAFE_API_KEY
+  ? [new JevScorer({ timeout: 10_000 }), gemini]
+  : [gemini];
+
 const { port } = await createServer({
   scorer,
+  racers,
   writer: new GeminiWarningWriter(),
   store,
   port: Number(process.env.PORT ?? 8080),

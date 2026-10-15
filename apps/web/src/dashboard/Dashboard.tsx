@@ -39,9 +39,14 @@ export function Dashboard() {
     <div className="dash">
       <header className="dash__head">
         <h1>Fraud dashboard</h1>
-        <Link to="/" className="dash__back">
-          ← Back to the phone
-        </Link>
+        <span className="dash__links">
+          <Link to="/race" className="dash__back">
+            Jev vs Gemini
+          </Link>
+          <Link to="/" className="dash__back">
+            ← Back to the phone
+          </Link>
+        </span>
       </header>
 
       {sessions.status === 'error' && (
