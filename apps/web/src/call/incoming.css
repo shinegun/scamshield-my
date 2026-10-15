@@ -1,0 +1,108 @@
+/* Incoming call (docs/design/native/incoming.dc.html). */
+.incoming {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 52px 24px calc(56px + var(--safe-bottom));
+  background: var(--phone-bg);
+  color: var(--text-primary);
+}
+
+.incoming__kind {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.incoming__number {
+  margin: 4px 0 0;
+  font-size: 34px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.incoming__place {
+  margin: 2px 0 0;
+  font-size: 17px;
+  color: var(--text-secondary);
+}
+
+.incoming__capsule {
+  margin: 22px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  background: var(--surface-grouped);
+  font-size: 15px;
+}
+
+.incoming__tile {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.incoming__actions {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 18px;
+}
+
+.incoming__ctl {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: #ebebf5;
+}
+
+.incoming__btn {
+  width: 76px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+}
+
+.incoming__btn--decline {
+  background: var(--end-call-fill);
+}
+
+/* Green here is the phone's own answer button, not a risk colour. */
+.incoming__btn--accept {
+  background: #34c759;
+}
+
+.incoming__btn:focus-visible {
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .incoming__btn--accept {
+    animation: incoming-ring 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes incoming-ring {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
