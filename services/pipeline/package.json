@@ -15,6 +15,7 @@
     "@google/genai": "^2.29.0",
     "@scamshield/shared": "workspace:*",
     "@typesafe-ai/sdk": "^0.6.0",
+    "firebase-admin": "^14.5.0",
     "ws": "^8.22.0"
   },
   "devDependencies": {

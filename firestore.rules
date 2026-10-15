@@ -1,0 +1,18 @@
+rules_version = '2';
+
+// The dashboard reads calls through realtime listeners from a public link, so
+// anyone may read them; they hold demo data only (see packages/shared/src/store.ts).
+// Only the pipeline writes, through the Admin SDK, which bypasses these rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /sessions/{sessionId} {
+      allow read: if true;
+      allow write: if false;
+
+      match /{sub=**} {
+        allow read: if true;
+        allow write: if false;
+      }
+    }
+  }
+}
