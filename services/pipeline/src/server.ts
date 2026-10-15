@@ -6,11 +6,14 @@ import type { Scorer } from './scorers/types';
 import { CallSession } from './session';
 import type { CallStore } from './store/types';
 import type { WarningWriter } from './warnings/writer';
+import type { WarningSpeech } from './warnings/speech';
 
 export interface ServerOptions {
   scorer: Scorer;
   // Without a writer, warnings use the fixed fallback strings.
   writer?: WarningWriter;
+  // Spoken clips for strong and hold warnings; without one they are silent.
+  speech?: WarningSpeech;
   // Where calls are recorded; without one nothing is stored.
   store?: CallStore;
   // 0 picks a free port (tests).
@@ -82,6 +85,7 @@ export async function createServer(
     const session = new CallSession({
       scorer: opts.scorer,
       writer: opts.writer,
+      speech: opts.speech,
       store: opts.store,
       now,
       send: (message: ServerMessage) => {

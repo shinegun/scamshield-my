@@ -13,6 +13,7 @@ import { createServer } from './server';
 import type { Scorer } from './scorers/types';
 import { FALLBACK_WARNINGS } from './warnings/fallbacks';
 import type { WarningInput, WarningWriter } from './warnings/writer';
+import type { WarningSpeech } from './warnings/speech';
 
 function decision(scamStage: ScamStage, flags: Partial<FlagScores> = {}): Decision {
   return { scamStage, scamType: 'fake_police', flags: { ...emptySession().peakFlags, ...flags } };
@@ -452,5 +453,39 @@ describe('caps for a public link (#18)', () => {
     const a = await open();
     a.send(say('x'.repeat(20_000)));
     expect(await a.closed()).toBe(1009);
+  });
+});
+
+describe('spoken warnings', () => {
+  it('attaches audioUrl to strong and hold warnings only', async () => {
+    const speech: WarningSpeech = { audioFor: (action, lang) => `data:audio/mpeg;base64,${action}-${lang}` };
+    const server = await createServer({
+      scorer: fakeScorer(MCMC_CALL.map(([d]) => d)),
+      speech,
+      port: 0,
+      now: () => 1_000_000,
+    });
+    closers.push(() => server.close());
+    const client = await Client.connect(server.port);
+    closers.unshift(() => client.close());
+    client.send({ ...START, language: 'en-MY' });
+    await client.next('session.started');
+    for (const [i] of MCMC_CALL.entries()) client.send(say(`line ${i}`));
+    const soft = await client.next('warning');
+    const strong = await client.next('warning');
+    const hold = await client.next('warning');
+    expect(soft.action).toBe('soft_warning');
+    expect(soft.audioUrl).toBeUndefined();
+    expect(strong.audioUrl).toBe('data:audio/mpeg;base64,strong_warning-en-MY');
+    expect(hold.audioUrl).toBe('data:audio/mpeg;base64,hold_transfers-en-MY');
+  });
+
+  it('sends no audioUrl without a speech source', async () => {
+    const { client } = await setup(fakeScorer(MCMC_CALL.map(([d]) => d)));
+    client.send(START);
+    await client.next('session.started');
+    for (const [i] of MCMC_CALL.entries()) client.send(say(`line ${i}`));
+    await client.next('warning');
+    expect((await client.next('warning')).audioUrl).toBeUndefined();
   });
 });

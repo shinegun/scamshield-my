@@ -20,6 +20,7 @@ import {
 import type { CallStore } from './store/types';
 import type { Scorer } from './scorers/types';
 import { writeWarning, type WarningWriter } from './warnings/writer';
+import type { WarningSpeech } from './warnings/speech';
 
 // What the scorer sees each tick: the latest lines back to about 600
 // characters (30-45 s of speech), and never fewer than 2 lines. A real call
@@ -44,6 +45,8 @@ export interface SessionOptions {
   scorer: Scorer;
   // Writes the warning text; without one the fixed fallback strings are used.
   writer?: WarningWriter;
+  // Spoken clips for strong and hold warnings; without one warnings are silent.
+  speech?: WarningSpeech;
   // Records the call as it happens. Writes are never waited on and their
   // errors are only logged. Without one, nothing is stored.
   store?: CallStore;
@@ -426,7 +429,15 @@ export class CallSession {
     });
     this.warnChain = Promise.all([this.warnChain, pending]).then(([, text]) => {
       if (this.ended) return;
-      this.opts.send({ type: 'warning', action, text, language: started.language });
+      const audioUrl =
+        action === 'soft_warning' ? undefined : this.opts.speech?.audioFor(action, started.language);
+      this.opts.send({
+        type: 'warning',
+        action,
+        text,
+        language: started.language,
+        ...(audioUrl ? { audioUrl } : {}),
+      });
     });
   }
 
