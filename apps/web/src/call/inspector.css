@@ -53,7 +53,7 @@
   display: block;
   margin-top: 8px;
   font-size: 13px;
-  color: var(--light-text-tertiary);
+  color: var(--light-text-secondary);
 }
 .insp__stage[data-reached='true'] .insp__stage-label { color: var(--light-text-primary); }
 .insp__stage[data-current='true'] .insp__stage-label { font-weight: 600; }
@@ -98,7 +98,7 @@
   background: var(--light-surface-grouped);
 }
 .insp__group--muted,
-.insp__row--muted { color: var(--light-text-tertiary); }
+.insp__row--muted { color: var(--light-text-secondary); }
 .insp__row {
   display: flex;
   justify-content: space-between;

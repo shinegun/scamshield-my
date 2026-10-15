@@ -8,11 +8,13 @@ ScamShield listens to a phone call, warns you in your own language as the signs 
 
 **https://scamshield-my-511604.web.app** works in any browser, on a phone or a laptop. It takes about two minutes:
 
-1. Pick a scripted call: the Malay scam, the same scam in Manglish, or an innocent call from a bank. Use 2x to go faster.
-2. Watch the risk bar and the scam stage move as the caller talks. A banner warns early; a full-screen warning (spoken aloud) follows when the call turns dangerous.
-3. Press **Open bank app** and try to send money to the "safe account". The transfer is held, and the app explains why in plain words.
-4. Open the **Fraud dashboard** (link at the bottom) in a second tab or window. The bank's fraud team sees the same call live: risk over time, the red flags raised, and the held transfer.
-5. On the dashboard, **Jev vs Gemini** sends the same piece of a call to both scorers and compares their answers and response times.
+1. On a laptop the phone is already ringing with the Manglish scam; on a phone, pick a call from the list. There are three: the Malay scam, the same scam in Manglish, and an innocent call from a bank. Choose 2× to go faster, then press **Accept**.
+2. The call plays as live captions, with the newest caller line large and plain-word signals ("Claims to be police or an official") under the line that raised them. On a laptop, the "What ScamShield hears" panel beside the phone shows the risk, the scam stage, the risk over time and the signals heard so far.
+3. A notification card warns early. When the call turns dangerous, a scam alert covers the call and is read aloud. Press **Continue call** to stay on the line (End Call ends it).
+4. Press **Open bank app** and try to send money to the "safe account". The transfer is paused, and the bank explains why in plain words.
+5. Press the red end button. The call summary shows the peak risk, when the first warning came, the money kept safe and a timeline of what happened.
+6. **Fraud desk** (`/dashboard`, linked from the front door) is the bank's view of the same calls, live from Firestore: held transfers, risk over time, and signals and stages with times.
+7. **Jev vs Gemini** (`/race`) sends the same piece of a call to both scorers. "Run 5 times" shows the median response time of each.
 
 The innocent call should stay quiet all the way through. That is the other half of the job.
 
@@ -83,11 +85,11 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | `services/pipeline/Dockerfile`, `deploy.sh` | Done. Builds with Cloud Build and deploys to Cloud Run (see "Deployed pipeline"). |
 | `services/pipeline/src/warnings` | Done, tested. One warning per new action level, written by Gemini 2.5 Flash in Malay or English, with fixed fallback text if Gemini takes over 2.5 s. |
 | `services/pipeline/src/warnings/speech.ts` | Done, tested. The strong and hold warnings are spoken: fixed lines per language recorded with Gemini 2.5 Flash TTS (Cloud Text-to-Speech, voice Kore) and sent as `audioUrl`. Recorded at boot and again on any call start while a clip is missing; the web app plays each new one once, with a Mute button. |
-| `services/pipeline` race (`race.run`) and `apps/web/src/race` | Done, tested. `/race` sends one transcript chunk to Jev and Gemini at once and shows both answers and times; "Run 5 times" gives medians. 15 Oct, Malay money-request chunk: Jev 235 ms median, Gemini 895 ms (5/5 each). |
+| `services/pipeline` race (`race.run`) and `apps/web/src/race` | Done, tested. `/race` sends one transcript chunk to Jev and Gemini at once; the keynote-style page puts the measured median in its headline, with a bar per scorer and a dot per run. 15 Oct, Malay money-request chunk: Jev 235 ms median, Gemini 895 ms (5/5 each). |
 | `services/pipeline/src/scorers` | Done, tested. Jev, Gemini 2.5 Flash on Vertex AI, and the fallback wrapper (Jev first, Gemini after 800 ms). |
 | `services/pipeline/src/store` | Done, tested. Writes each call to Firestore as it happens (session, a risk entry per tick, holds) in the `store.ts` shapes, without waiting on the writes. On when `K_SERVICE` (Cloud Run) or `STORE=firestore` is set; local runs write nothing. |
-| `apps/web` | Done, 69 tests. Phone-styled bank app: pick a scripted call, live transcript and risk bar, a banner that follows the latest warning, full-screen warnings, transfer hold with a 10 s "this was really me" release. Labels and the hold screen are in Malay on Malay calls. Run with `pnpm --filter @scamshield/web dev` next to the pipeline. |
-| `apps/web/src/dashboard` | Done, tested. Fraud dashboard at `/dashboard`: live call list, risk over time, flags, stage, type and holds, read from Firestore with realtime listeners. Firebase config comes from Hosting's `/__/firebase/init.json` (or `VITE_FIREBASE_*` locally, see `apps/web/.env.example`). |
+| `apps/web` | Done, 128 tests. Restyled to the Native design (`docs/design`): the phone is dark iOS, and the desktop, fraud desk and bank are light. Front door with a ringing phone, incoming call, live captions with signal labels (`call/signals.ts`), the desktop "What ScamShield hears" panel (`call/inspector.ts`), notification card and spoken scam alert, the bank's "Transfer paused" screen with a 10 s "this was really me" release, and the call summary (`call/summary.ts`). Labels, alerts, the hold screen and the summary are in Malay on Malay calls. Run with `pnpm --filter @scamshield/web dev` next to the pipeline. |
+| `apps/web/src/dashboard` | Done, tested. Fraud desk at `/dashboard`: three panes with filters (live, held, warned, all), call list, held-transfer banner, risk over time, and signals and stages with times (`dashboard/desk.ts`), read from Firestore with realtime listeners. Firebase config comes from Hosting's `/__/firebase/init.json` (or `VITE_FIREBASE_*` locally, see `apps/web/.env.example`). |
 | `firebase.json`, `apps/web/deploy.sh` | Done. Firebase Hosting for the web app (see "Live demo"). |
 | `firestore.rules` | Done, deployed. Anyone can read `sessions/**`; every client write is refused. The pipeline writes through the Admin SDK. Deploy with `firebase deploy --only firestore:rules --project scamshield-my-511604`. |
 | `scripts/health-check.ts` | Done. `pnpm health` plays the Manglish scam and the innocent call against the live pipeline: exit 0 when the scam is held and the innocent call isn't, 1 on a wrong result, 2 when unreachable or switched off. Run before recording and submitting. |
