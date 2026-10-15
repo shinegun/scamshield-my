@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useCall } from '../call/CallProvider';
 import { CallScreen } from '../call/CallScreen';
+import { CallSummary } from '../call/CallSummary';
 import { InspectorPanel } from '../call/InspectorPanel';
 import { PhoneFrame } from '../phone/PhoneFrame';
 import { ReplayFrontDoor } from '../replay/ReplayFrontDoor';
@@ -38,7 +39,9 @@ export function PhonePage() {
       )}
       <div className={desk ? 'desk__grid' : 'desk-off'}>
         <div className={desk ? 'desk__phone' : 'desk-off'}>
-          <PhoneFrame>{status === 'idle' ? <ReplayFrontDoor /> : <CallScreen />}</PhoneFrame>
+          <PhoneFrame>
+            {status === 'idle' ? <ReplayFrontDoor /> : status === 'ended' ? <CallSummary /> : <CallScreen />}
+          </PhoneFrame>
         </div>
         {desk && <InspectorPanel />}
       </div>
