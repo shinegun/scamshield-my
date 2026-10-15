@@ -44,12 +44,16 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | `packages/shared/src/scripts` | Done, 4 tests. The three replay calls, drafted with ILMU (`packages/shared/tools/draft-calls.ts`): Malay and Manglish scam calls of 142 s each (22 lines, line for line), and a 50 s innocent bank check. |
 | `services/pipeline/src/scorers/jev.ts` | Done, 2 tests against a faked API. Run against the real Jev on 14 October: Malay as good as English, 227–364 ms per tick (ADR 2). |
 | `services/pipeline/src/fixtures` | Done. Scripted scam call and normal calls, in Malay and English. |
-| `services/pipeline/src/server.ts`, `session.ts` | Done, tested. WebSocket server on `/call`: session state, a scoring tick per injected line, `risk` messages, transfer hold and release, `clock.skip`. No Firestore yet. |
+| `services/pipeline/src/server.ts`, `session.ts` | Done, tested. WebSocket server on `/call`: session state, a scoring tick per injected line, `risk` messages, transfer hold and release, `clock.skip`. Reports the call's dominant scam type (most ticks), not the last one. |
 | `services/pipeline/Dockerfile`, `deploy.sh` | Done. Builds with Cloud Build and deploys to Cloud Run (see "Deployed pipeline"). |
 | `services/pipeline/src/warnings` | Done, tested. One warning per new action level, written by Gemini 2.5 Flash in Malay or English, with fixed fallback text if Gemini takes over 2.5 s. |
 | `services/pipeline/src/scorers` | Done, tested. Jev, Gemini 2.5 Flash on Vertex AI, and the fallback wrapper (Jev first, Gemini after 800 ms). |
-| `apps/web` | Done for M1, 46 tests. Phone-styled bank app: pick a scripted call, live transcript and risk bar, soft banner and full-screen warnings, transfer hold with a 10 s "this was really me" release. Dashboard route is a placeholder (#15). Run with `pnpm --filter @scamshield/web dev` next to the pipeline. |
+| `services/pipeline/src/store` | Done, tested. Writes each call to Firestore as it happens (session, a risk entry per tick, holds) in the `store.ts` shapes, without waiting on the writes. On when `K_SERVICE` (Cloud Run) or `STORE=firestore` is set; local runs write nothing. |
+| `apps/web` | Done, 69 tests. Phone-styled bank app: pick a scripted call, live transcript and risk bar, a banner that follows the latest warning, full-screen warnings, transfer hold with a 10 s "this was really me" release. Labels and the hold screen are in Malay on Malay calls. Run with `pnpm --filter @scamshield/web dev` next to the pipeline. |
+| `apps/web/src/dashboard` | Done, tested. Fraud dashboard at `/dashboard`: live call list, risk over time, flags, stage, type and holds, read from Firestore with realtime listeners. Firebase config comes from Hosting's `/__/firebase/init.json` (or `VITE_FIREBASE_*` locally, see `apps/web/.env.example`). |
 | `firebase.json`, `apps/web/deploy.sh` | Done. Firebase Hosting for the web app (see "Live demo"). |
+| `firestore.rules` | Done, deployed. Anyone can read `sessions/**`; every client write is refused. The pipeline writes through the Admin SDK. Deploy with `firebase deploy --only firestore:rules --project scamshield-my-511604`. |
+| `scripts/health-check.ts` | Done. `pnpm health` plays the Manglish scam and the innocent call against the live pipeline: exit 0 when the scam is held and the innocent call isn't, 1 on a wrong result, 2 when unreachable or switched off. Run before recording and submitting. |
 
 ## Run it
 
