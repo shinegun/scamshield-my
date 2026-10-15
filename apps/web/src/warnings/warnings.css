@@ -33,6 +33,11 @@
   animation: warn-slide-in 0.35s ease-out;
 }
 
+.warn-banner[data-tone='strong'] {
+  background: var(--risk-hold);
+  color: #fff;
+}
+
 .warn-banner__icon {
   flex: none;
   width: 22px;
@@ -44,6 +49,16 @@
   color: var(--risk-soft);
   font-size: 14px;
   font-weight: 800;
+}
+
+.warn-banner[data-tone='strong'] .warn-banner__icon {
+  background: #fff;
+  color: var(--risk-hold);
+}
+
+.warn-banner[data-tone='strong'] .warn-banner__close {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
 }
 
 .warn-banner__text {

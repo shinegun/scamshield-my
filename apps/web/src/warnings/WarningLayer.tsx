@@ -1,6 +1,7 @@
 import { useEffect, useReducer, useRef } from 'react';
 import { useCall, type WarningMessage } from '../call/CallProvider';
 import {
+  bannerTone,
   deriveWarningView,
   dismissBanner,
   dismissOverlay,
@@ -19,12 +20,12 @@ export function WarningLayer() {
   return <WarningLayerInner key={sessionId ?? 'no-session'} warnings={warnings} />;
 }
 
-type UiAction = { type: 'dismiss-banner' } | { type: 'dismiss-overlay'; warnings: WarningMessage[] } | { type: 'reopen' };
+type UiAction = { type: 'dismiss-banner'; warnings: WarningMessage[] } | { type: 'dismiss-overlay'; warnings: WarningMessage[] } | { type: 'reopen' };
 
 function uiReducer(state: WarningUiState, action: UiAction): WarningUiState {
   switch (action.type) {
     case 'dismiss-banner':
-      return dismissBanner(state);
+      return dismissBanner(state, action.warnings);
     case 'dismiss-overlay':
       return dismissOverlay(state, action.warnings);
     case 'reopen':
@@ -50,7 +51,7 @@ function WarningLayerInner({ warnings }: { warnings: WarningMessage[] }) {
       <div className="warn-top">
         <div role="status" aria-live="polite">
           {banner && (
-            <div className="warn-banner" lang={banner.language}>
+            <div className="warn-banner" data-tone={bannerTone(banner.action)} lang={banner.language}>
               <span className="warn-banner__icon" aria-hidden="true">
                 !
               </span>
@@ -59,7 +60,7 @@ function WarningLayerInner({ warnings }: { warnings: WarningMessage[] }) {
                 type="button"
                 className="warn-banner__close"
                 aria-label={banner.language.toLowerCase().startsWith('ms') ? 'Tutup' : 'Dismiss'}
-                onClick={() => dispatch({ type: 'dismiss-banner' })}
+                onClick={() => dispatch({ type: 'dismiss-banner', warnings })}
               >
                 ×
               </button>

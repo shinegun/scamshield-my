@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from 'react';
 import { ACCOUNT_NAME, RELEASE_DELAY_SEC, formatRm } from './bankMachine';
-import { holdExplanation } from './explain';
+import { langOf } from '../call/labels';
+import { useCall } from '../call/CallProvider';
+import { holdExplanation, holdStrings } from './explain';
 import type { BankSession } from './useBankSession';
 
 const QUICK_RECIPIENTS = ['Mak', 'Landlord', 'Akaun selamat Bank Negara'];
@@ -152,6 +154,7 @@ function TransferForm({ bank }: { bank: BankSession }) {
   const [amount, setAmount] = useState(state.transfer ? String(state.transfer.amountRm) : '');
   const [error, setError] = useState<string>();
   const paused = bank.risk?.action === 'hold_transfers';
+  const t = holdStrings(langOf(useCall().script?.language));
 
   return (
     <form
@@ -167,7 +170,7 @@ function TransferForm({ bank }: { bank: BankSession }) {
 
       {paused && (
         <p className="bank__banner" role="status">
-          Transfers are paused during this call.
+          {t.pausedNotice}
         </p>
       )}
       {state.notice && (
@@ -232,27 +235,28 @@ function HeldScreen({ bank }: { bank: BankSession }) {
   const { state, dispatch } = bank;
   const { transfer } = state;
   if (!transfer) return null;
-  const why = holdExplanation(bank.risk);
+  const lang = langOf(useCall().script?.language);
+  const t = holdStrings(lang);
+  const why = holdExplanation(bank.risk, lang);
 
   return (
     <>
       <div className="bank__block" aria-hidden="true">
         !
       </div>
-      <h3 className="bank__h bank__h--hold">Transfer held to protect you</h3>
+      <h3 className="bank__h bank__h--hold">{t.title}</h3>
       <p className="bank__text">
-        We stopped {formatRm(transfer.amountRm)} to {transfer.toAccount} because this looks like it could be
-        part of a scam. Your balance has not changed: {formatRm(state.balanceRm)}.
+        {t.body(formatRm(transfer.amountRm), transfer.toAccount, formatRm(state.balanceRm))}
       </p>
 
       {why.scamLabel && (
         <p className="bank__text">
-          This call looks like: <strong>{why.scamLabel}</strong>
+          {t.looksLike} <strong>{why.scamLabel}</strong>
         </p>
       )}
       {why.phrases.length > 0 ? (
         <>
-          <p className="bank__text bank__text--tight">What we noticed on this call:</p>
+          <p className="bank__text bank__text--tight">{t.noticed}</p>
           <ul className="bank__reasons">
             {why.phrases.map((p) => (
               <li key={p}>{p}</li>
@@ -260,7 +264,7 @@ function HeldScreen({ bank }: { bank: BankSession }) {
           </ul>
         </>
       ) : (
-        <p className="bank__text">Transfers are paused while this call looks risky.</p>
+        <p className="bank__text">{t.pausedWhileRisky}</p>
       )}
 
       {state.notice && (
@@ -275,14 +279,14 @@ function HeldScreen({ bank }: { bank: BankSession }) {
           className="bank__btn bank__btn--primary"
           onClick={() => dispatch({ type: 'cancelTransfer' })}
         >
-          Cancel transfer
+          {t.cancel}
         </button>
         <button
           type="button"
           className="bank__btn bank__btn--ghost"
           onClick={() => dispatch({ type: 'requestRelease' })}
         >
-          This was really me
+          {t.reallyMe}
         </button>
       </div>
     </>
