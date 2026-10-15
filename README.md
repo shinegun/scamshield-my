@@ -132,6 +132,20 @@ To redeploy after a change, from the repo root:
 services/pipeline/deploy.sh
 ```
 
+To control cost, switch it between modes (`deploy.sh` always leaves it `on`):
+
+```bash
+services/pipeline/power.sh status
+```
+
+| Mode | When | Idle cost | Visitors |
+| --- | --- | --- | --- |
+| `on` | recording, judging, until results are announced | one warm instance | instant |
+| `idle` | day to day | none | first call waits a few seconds for a cold start |
+| `off` | nobody should use it | none | refused (403) |
+
+Calls cost Jev and Gemini usage in any mode that accepts them; the caps (#18) bound that.
+
 To run the local web app against it:
 
 ```bash
