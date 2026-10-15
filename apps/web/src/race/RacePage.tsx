@@ -3,17 +3,16 @@ import { Link } from 'react-router-dom';
 import type { RaceEntry } from '@scamshield/shared';
 import { connectCallSocket, type CallSocket } from '../call/socket';
 import { PIPELINE_URL } from '../config';
-import { formatLatency } from '../call/labels';
 import {
-  MAX_CHARS,
   RUNS,
-  SCORER_LABELS,
+  axisTicks,
   buildPresets,
   deckLine,
-  fasterNote,
+  laneViews,
+  raceHeadline,
+  raceSubline,
+  scaleMaxFor,
   summarizeRuns,
-  toColumns,
-  type ColumnView,
 } from './view';
 import './race.css';
 
@@ -36,6 +35,7 @@ export function RacePage() {
   const [error, setError] = useState<string | null>(null);
   const [runs, setRuns] = useState<RaceEntry[][]>([]);
   const [copied, setCopied] = useState(false);
+  const [ranLabel, setRanLabel] = useState('');
 
   const socketRef = useRef<CallSocket | null>(null);
   const pendingRef = useRef<Pending | null>(null);
@@ -87,6 +87,7 @@ export function RacePage() {
       setError(null);
       setCopied(false);
       setRuns([]);
+      setRanLabel(presets.find((p) => p.id === presetId)?.label ?? '');
       const done: RaceEntry[][] = [];
       try {
         for (let i = 1; i <= times; i++) {
@@ -100,7 +101,7 @@ export function RacePage() {
         setBusy(null);
       }
     },
-    [busy, text, language, raceOnce],
+    [busy, text, language, raceOnce, presets, presetId],
   );
 
   const choose = (id: string) => {
@@ -112,12 +113,11 @@ export function RacePage() {
     }
   };
 
-  const latest = runs[runs.length - 1];
-  const columns = latest ? toColumns(latest) : [];
-  const jev = columns.find((c) => c.scorer === 'jev');
-  const gem = columns.find((c) => c.scorer === 'gemini');
-  const note = jev?.ok && gem?.ok ? fasterNote(jev.latencyMs, gem.latencyMs) : '';
-  const stats = runs.length > 1 ? summarizeRuns(runs) : null;
+  const stats = runs.length > 0 ? summarizeRuns(runs) : null;
+  const headline = raceHeadline(stats);
+  const lanes = laneViews(runs);
+  const ticks = axisTicks(scaleMaxFor(runs));
+  const disabled = busy !== null || link === 'down' || !text.trim();
 
   const copy = async () => {
     if (!stats) return;
@@ -131,167 +131,108 @@ export function RacePage() {
 
   return (
     <div className="race">
-      <header className="race__head">
-        <h1>Jev vs Gemini</h1>
-        <Link to="/dashboard" className="race__back">
-          ← Back to the dashboard
+      <nav className="race__nav">
+        <h1 className="race__brand">Jev vs Gemini</h1>
+        <Link to="/dashboard" className="race__link race__link--first">
+          Fraud desk
         </Link>
+        <Link to="/" className="race__link">
+          Back to the phone
+        </Link>
+      </nav>
+
+      <header className="race__top">
+        <p className="race__sub">
+          {runs.length > 0
+            ? raceSubline(ranLabel, runs.length)
+            : 'Pick a line from a scripted call and race the two scorers.'}
+        </p>
+        <p className="race__headline" aria-live="polite">
+          {headline.lead}
+          {headline.value && <span className="race__value">{headline.value}</span>}
+          {headline.value && '.'}
+        </p>
       </header>
-      <p className="race__lede">
-        The same transcript chunk goes to both scorers at once. Each gets the chunk as a fresh call, with no earlier
-        context.
-      </p>
 
-      <section className="race__input">
-        <div className="race__presets" role="group" aria-label="Preset chunks">
-          {presets.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className={`race__chip${p.id === presetId ? ' race__chip--on' : ''}`}
-              onClick={() => choose(p.id)}
-              disabled={busy !== null}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-        <textarea
-          className="race__text"
-          value={text}
-          maxLength={MAX_CHARS}
-          rows={8}
-          aria-label="Transcript chunk"
-          onChange={(e) => {
-            setText(e.target.value);
-            setPresetId('');
-          }}
-        />
-        <div className="race__row">
-          <label className="race__lang">
-            Language
-            <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-              <option value="ms-MY">Malay</option>
-              <option value="en-MY">English / Manglish</option>
-            </select>
-          </label>
-          <span className="race__count">
-            {text.length} / {MAX_CHARS}
-          </span>
+      <div className="race__presets" role="group" aria-label="Scripted lines">
+        {presets.map((p) => (
           <button
+            key={p.id}
             type="button"
-            className="race__go"
-            onClick={() => void run(1)}
-            disabled={busy !== null || link === 'down' || !text.trim()}
+            className="race__chip"
+            aria-pressed={p.id === presetId}
+            onClick={() => choose(p.id)}
+            disabled={busy !== null}
           >
-            Race once
+            <span>{p.label}</span>
           </button>
-          <button
-            type="button"
-            className="race__go race__go--alt"
-            onClick={() => void run(RUNS)}
-            disabled={busy !== null || link === 'down' || !text.trim()}
-          >
-            Run {RUNS} times
-          </button>
-        </div>
-        {busy && (
-          <p className="race__muted" role="status">
-            Running {busy.run} of {busy.of}…
-          </p>
-        )}
-        {error && (
-          <p className="race__error" role="alert">
-            {error}
-          </p>
-        )}
-      </section>
+        ))}
+      </div>
 
-      {columns.length > 0 && (
-        <section aria-label="Result">
-          {note && <p className="race__note">{note}</p>}
-          <div className="race__cols">
-            {columns.map((c) => (
-              <Column key={c.scorer} c={c} />
+      <section className="race__lanes" aria-label="Latency by scorer">
+        {lanes.map((l) => {
+          const won = headline.winner === l.scorer;
+          return (
+            <div key={l.scorer} className="race__lane">
+              <div className="race__name">{l.title}</div>
+              <div className="race__track">
+                {l.dots.length > 0 && (
+                  <div
+                    className={`race__bar${won ? ' race__bar--win' : ''}`}
+                    style={{ width: `${l.medianPercent}%` }}
+                  />
+                )}
+                {l.dots.map((d, i) => (
+                  <span key={i} className="race__dot" style={{ left: `${d}%` }} />
+                ))}
+              </div>
+              <div className="race__figures">
+                <div className={`race__median${won ? ' race__median--win' : ''}`}>{l.medianText}</div>
+                <div className="race__meta">{l.rangeText || '\u00a0'}</div>
+                <div className="race__meta">{l.error ?? l.verdict ?? '\u00a0'}</div>
+              </div>
+            </div>
+          );
+        })}
+        <div className="race__lane race__lane--axis" aria-hidden="true">
+          <div />
+          <div className="race__ticks">
+            {ticks.map((t, i) => (
+              <span key={i}>{t}</span>
             ))}
           </div>
-        </section>
-      )}
+          <div />
+        </div>
+      </section>
 
-      {stats && !busy && (
-        <section className="race__stats" aria-label="Latency over runs">
-          <h2>
-            Median of {RUNS} runs
-          </h2>
-          <table>
-            <thead>
-              <tr>
-                <th />
-                <th>Median</th>
-                <th>Min</th>
-                <th>Max</th>
-                <th>Answered</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats.map((s) => (
-                <tr key={s.scorer}>
-                  <th scope="row">{SCORER_LABELS[s.scorer]}</th>
-                  <td>{s.ok ? formatLatency(s.medianMs) : '-'}</td>
-                  <td>{s.ok ? formatLatency(s.minMs) : '-'}</td>
-                  <td>{s.ok ? formatLatency(s.maxMs) : '-'}</td>
-                  <td>
-                    {s.ok} / {s.runs}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <button type="button" className="race__go race__go--alt" onClick={() => void copy()}>
-            {copied ? 'Copied' : 'Copy for deck'}
+      <footer className="race__bottom">
+        <div className="race__actions">
+          <button type="button" className="race__go" onClick={() => void run(1)} disabled={disabled}>
+            Race again
           </button>
-          <p className="race__muted">{deckLine(stats)}</p>
-        </section>
-      )}
+          <button type="button" className="race__go race__go--alt" onClick={() => void run(RUNS)} disabled={disabled}>
+            Run {RUNS} times
+          </button>
+          {busy && (
+            <span className="race__meta" role="status">
+              Run {busy.run} of {busy.of}…
+            </span>
+          )}
+          {error && (
+            <span className="race__error" role="alert">
+              {error}
+            </span>
+          )}
+        </div>
+        <div className="race__note">
+          <span>Bars show the median. Dots are single runs.</span>
+          {runs.length >= 2 && !busy && (
+            <button type="button" className="race__copy" onClick={() => void copy()}>
+              {copied ? 'Copied' : 'Copy summary'}
+            </button>
+          )}
+        </div>
+      </footer>
     </div>
-  );
-}
-
-function Column({ c }: { c: ColumnView }) {
-  return (
-    <article className={`race__col race__col--${c.scorer}`}>
-      <h2>{c.title}</h2>
-      {c.model && <p className="race__model">{c.model}</p>}
-      <p className="race__latency">{c.latencyText}</p>
-      <div className="race__bar" aria-hidden="true">
-        <div className="race__bar-fill" style={{ width: `${c.barPercent}%` }} />
-      </div>
-      {c.ok ? (
-        <dl className="race__facts">
-          <dt>Risk</dt>
-          <dd>{c.percent}</dd>
-          <dt>Stage</dt>
-          <dd>{c.stageText}</dd>
-          <dt>Scam type</dt>
-          <dd>{c.scamTypeText}</dd>
-          <dt>Flags</dt>
-          <dd>
-            {c.flags.length === 0 ? (
-              <span className="race__muted">None raised</span>
-            ) : (
-              <ul className="race__flags">
-                {c.flags.map((f) => (
-                  <li key={f.key}>
-                    {f.label} <span className="race__muted">{Math.round(f.score * 100)}%</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </dd>
-        </dl>
-      ) : (
-        <p className="race__error">{c.error}</p>
-      )}
-    </article>
   );
 }

@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { emptySession, type Decision, type RaceEntry } from '@scamshield/shared';
-import { buildPresets, deckLine, excerpt, fasterNote, median, summarizeRuns, toColumns } from './view';
+import {
+  axisTicks,
+  buildPresets,
+  deckLine,
+  excerpt,
+  fasterNote,
+  laneViews,
+  median,
+  raceHeadline,
+  raceSubline,
+  summarizeRuns,
+  toColumns,
+} from './view';
 
 const ok = (scorer: 'jev' | 'gemini', latencyMs: number, flags: Partial<Decision['flags']> = {}): RaceEntry => ({
   scorer,
@@ -104,5 +116,88 @@ describe('presets', () => {
     expect(excerpt(lines, 40)).toBe(`caller: ${'a'.repeat(10)}\nuser: ${'b'.repeat(10)}`);
     expect(excerpt(lines, 25)).toBe(`caller: ${'a'.repeat(10)}`);
     expect(excerpt([{ speaker: 'caller', text: 'x'.repeat(100) }], 30)).toHaveLength(30);
+  });
+});
+
+describe('raceHeadline', () => {
+  it('asks before any answer', () => {
+    expect(raceHeadline(null)).toEqual({ lead: 'Who decides first?' });
+    expect(raceHeadline(summarizeRuns([[fail('jev'), fail('gemini')]]))).toEqual({ lead: 'Who decides first?' });
+  });
+
+  it('names the scorer with the lower median', () => {
+    expect(raceHeadline(summarizeRuns([[ok('jev', 235), ok('gemini', 895)]]))).toEqual({
+      winner: 'jev',
+      lead: 'Jev decides in ',
+      value: '235 ms',
+    });
+    expect(raceHeadline(summarizeRuns([[ok('jev', 1500), ok('gemini', 900)]]))).toMatchObject({
+      winner: 'gemini',
+      value: '900 ms',
+    });
+  });
+
+  it('lets the only answering scorer win', () => {
+    expect(raceHeadline(summarizeRuns([[fail('jev'), ok('gemini', 1200)]]))).toMatchObject({ winner: 'gemini' });
+  });
+});
+
+describe('raceSubline', () => {
+  it('says once or n times', () => {
+    expect(raceSubline('Malay scam: asks for money', 5)).toBe(
+      'Malay scam: asks for money, sent to both scorers 5 times.',
+    );
+    expect(raceSubline('Innocent bank call', 1)).toBe('Innocent bank call, sent to both scorers once.');
+  });
+});
+
+describe('laneViews', () => {
+  it('is empty before any run', () => {
+    const [jev, gem] = laneViews([]);
+    expect(jev).toMatchObject({ scorer: 'jev', medianText: '—', rangeText: '', medianPercent: 0, dots: [] });
+    expect(gem!.verdict).toBeUndefined();
+  });
+
+  it('scales to the slowest answer and describes the range', () => {
+    const runs = [
+      [ok('jev', 225), ok('gemini', 802)],
+      [ok('jev', 253), ok('gemini', 1500)],
+      [ok('jev', 235), ok('gemini', 895)],
+    ];
+    const [jev, gem] = laneViews(runs);
+    expect(jev).toMatchObject({ title: 'Jev', medianText: '235 ms', rangeText: '225–253 ms · 3/3 answered' });
+    expect(jev!.medianPercent).toBeCloseTo((235 / 1600) * 100);
+    expect(jev!.dots).toHaveLength(3);
+    expect(gem).toMatchObject({ medianText: '895 ms', rangeText: '802 ms–1.5 s · 3/3 answered' });
+    expect(gem!.verdict).toBe('90% · Fake police');
+  });
+
+  it('uses a larger scale when a run is slow and shows a single run plainly', () => {
+    const [jev, gem] = laneViews([[ok('jev', 300), ok('gemini', 2500)]]);
+    expect(jev!.medianPercent).toBeCloseTo((300 / 3200) * 100);
+    expect(gem!.dots[0]).toBeCloseTo((2500 / 3200) * 100);
+    expect(jev!.rangeText).toBe('1/1 answered');
+  });
+
+  it('reports a failed latest answer and no-scam verdicts', () => {
+    const calm: RaceEntry = {
+      scorer: 'jev',
+      model: 'jev-m',
+      ok: true,
+      latencyMs: 200,
+      risk: 0.05,
+      decision: { scamStage: 'none', scamType: 'none', flags: emptySession().peakFlags },
+    };
+    const [jev, gem] = laneViews([[calm, fail('gemini')]]);
+    expect(jev!.verdict).toMatch(/· No scam$/);
+    expect(gem).toMatchObject({ error: 'timed out', medianText: '—', rangeText: '0/1 answered', dots: [] });
+  });
+});
+
+describe('axisTicks', () => {
+  it('labels five points', () => {
+    expect(axisTicks(1600)).toEqual(['0', '0.4 s', '0.8 s', '1.2 s', '1.6 s']);
+    expect(axisTicks(400)).toEqual(['0', '100 ms', '200 ms', '300 ms', '400 ms']);
+    expect(axisTicks(12800)).toEqual(['0', '3.2 s', '6.4 s', '9.6 s', '12.8 s']);
   });
 });
