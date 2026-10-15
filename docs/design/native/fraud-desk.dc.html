@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Native, fraud desk</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#0066CC;text-decoration:none}
+.sys{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif}
+.side{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:6px;font-size:14px}
+.item{padding:12px 16px;border-bottom:1px solid #E5E5EA;display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:10px;align-items:start}
+.dot{width:9px;height:9px;border-radius:50%;margin-top:5px}
+.h{font-size:12px;color:#6E6E73;text-transform:uppercase;margin-bottom:8px}
+.r{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #E5E5EA;font-size:14px}
+</style>
+</helmet>
+<div class="sys" style="width:1440px;height:900px;box-sizing:border-box;background:#fff;color:#1D1D1F;display:grid;grid-template-columns:220px 360px minmax(0,1fr)">
+  <aside style="background:#F2F2F7;border-right:1px solid #E5E5EA;padding:20px 12px;display:flex;flex-direction:column;gap:2px">
+    <div style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;padding:0 10px 16px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1D1D1F" stroke-width="2.2" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"></path></svg>Fraud desk
+    </div>
+    <div class="side" style="background:#DCDCE1;font-weight:500"><span>Live calls</span><span style="color:#6E6E73">1</span></div>
+    <div class="side"><span>Held transfers</span><span style="color:#6E6E73">1</span></div>
+    <div class="side"><span>Warned</span><span style="color:#6E6E73">2</span></div>
+    <div class="side"><span>All calls</span><span style="color:#6E6E73">3</span></div>
+    <div style="margin-top:auto;font-size:12px;color:#6E6E73;padding:0 10px;display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;background:#34C759"></div>Synced with Firestore</div>
+  </aside>
+
+  <section style="border-right:1px solid #E5E5EA;display:flex;flex-direction:column">
+    <div style="padding:20px 16px 12px;font-size:22px;font-weight:700;border-bottom:1px solid #E5E5EA">Live calls</div>
+    <div class="item" style="background:#E8F0FE">
+      <div class="dot" style="background:#FF3B30"></div>
+      <div><div style="font-weight:600;font-size:14px">+60 3-2611 4402</div><div style="font-size:13px;color:#6E6E73;margin-top:2px">Fake police · transfer held</div></div>
+      <div style="font-size:12px;color:#6E6E73">1:58</div>
+    </div>
+    <div class="item">
+      <div class="dot" style="background:#FF9500"></div>
+      <div><div style="font-weight:600;font-size:14px">+60 3-9206 1180</div><div style="font-size:13px;color:#6E6E73;margin-top:2px">Fake MCMC · warned, ended</div></div>
+      <div style="font-size:12px;color:#6E6E73">4m ago</div>
+    </div>
+    <div class="item">
+      <div class="dot" style="background:#C7C7CC"></div>
+      <div><div style="font-weight:600;font-size:14px">Demo Bank card team</div><div style="font-size:13px;color:#6E6E73;margin-top:2px">No scam signs</div></div>
+      <div style="font-size:12px;color:#6E6E73">9m ago</div>
+    </div>
+  </section>
+
+  <main style="padding:28px 36px;display:flex;flex-direction:column;gap:24px;min-width:0">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div style="font-size:13px;color:#6E6E73">Live · 1:58 · Manglish</div>
+        <div style="font-size:30px;font-weight:700;letter-spacing:-.01em;margin-top:2px">+60 3-2611 4402</div>
+      </div>
+      <div style="text-align:right"><div style="font-size:40px;font-weight:700;color:#D70015;line-height:1">92%</div><div style="font-size:13px;color:#6E6E73">scam risk · fake police</div></div>
+    </div>
+
+    <div style="padding:16px 18px;border-radius:12px;background:#FFF2F2;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center">
+      <div><div style="font-weight:600;font-size:15px">RM 50,000.00 to "Akaun Selamat BNM" is on hold</div><div style="font-size:13px;color:#6E6E73;margin-top:2px">Paused automatically at 1:58. The caller asked the customer to move money.</div></div>
+      <div style="display:flex;gap:8px">
+        <button style="height:32px;padding:0 14px;border-radius:7px;border:0;background:#1D1D1F;color:#fff;font:500 13px -apple-system,BlinkMacSystemFont,sans-serif">Keep on hold</button>
+        <button style="height:32px;padding:0 14px;border-radius:7px;border:1px solid #D2D2D7;background:#fff;color:#1D1D1F;font:500 13px -apple-system,BlinkMacSystemFont,sans-serif">Call customer</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="h">Risk over the call</div>
+      <svg viewBox="0 0 900 170" style="width:100%;height:170px" role="img" aria-label="Risk rising to 92 percent">
+        <line x1="0" y1="68" x2="900" y2="68" stroke="#FF3B30" stroke-dasharray="3 5"></line>
+        <line x1="0" y1="102" x2="900" y2="102" stroke="#FF9500" stroke-dasharray="3 5"></line>
+        <path d="M0 166 L100 164 L200 152 L300 126 L400 100 L500 86 L600 60 L700 34 L800 14" fill="none" stroke="#1D1D1F" stroke-width="2.5"></path>
+        <circle cx="800" cy="14" r="5" fill="#D70015"></circle>
+      </svg>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px">
+      <div>
+        <div class="h">Signals heard · 7 of 13</div>
+        <div class="r"><span>Asks to move money</span><span style="color:#D70015">1:58</span></div>
+        <div class="r"><span>Demands secrecy</span><span style="color:#D70015">1:24</span></div>
+        <div class="r"><span>Stay on the line</span><span style="color:#D70015">1:10</span></div>
+        <div class="r"><span>Claims to be police</span><span style="color:#C93400">0:31</span></div>
+      </div>
+      <div>
+        <div class="h">Stage reached</div>
+        <div class="r"><span>Authority setup</span><span style="color:#6E6E73">0:31</span></div>
+        <div class="r"><span>Victim framing</span><span style="color:#6E6E73">1:10</span></div>
+        <div class="r"><span>Isolation</span><span style="color:#6E6E73">1:24</span></div>
+        <div class="r"><span style="font-weight:600">Money request</span><span style="color:#6E6E73">1:58</span></div>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
