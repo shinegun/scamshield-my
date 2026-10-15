@@ -14,8 +14,8 @@
   height: min(var(--phone-h), calc(100dvh - 72px));
   display: flex;
   flex-direction: column;
-  background: var(--bg-phone);
-  color: var(--text);
+  background: var(--phone-bg);
+  color: var(--text-primary);
   border-radius: 46px;
   border: 10px solid #05080f;
   box-shadow: 0 30px 60px rgba(11, 18, 32, 0.35), 0 0 0 2px #2a3550;
@@ -56,7 +56,7 @@
 
 .statusbar__icons {
   font-size: 11px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .stage__link {

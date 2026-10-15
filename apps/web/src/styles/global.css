@@ -1,20 +1,44 @@
 :root {
-  --bg-page: #e7e9ee;
-  --bg-phone: #0b1220;
-  --bg-panel: #131c2e;
-  --bg-raised: #1b2740;
-  --border: #26344f;
-  --text: #eef2fa;
-  --text-dim: #9aa8c2;
-  --accent: #4f8cff;
+  /* Native design tokens: docs/design/README.md. Named by role. */
 
-  --risk-none: #2fbf71;
-  --risk-soft: #f2b01e;
-  --risk-strong: #f27a1e;
-  --risk-hold: #ec3b4b;
+  /* Dark: the phone and the race page */
+  --phone-bg: #000000;
+  --surface-grouped: #1c1c1e;
+  --surface-raised: #2c2c2e;
+  --fill-control: rgba(120, 120, 128, 0.32);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(235, 235, 245, 0.6);
+  --text-tertiary: rgba(235, 235, 245, 0.38);
+  --separator: rgba(84, 84, 88, 0.6);
+  --action-blue: #0a84ff;
 
-  --bubble-caller: #263654;
-  --bubble-user: #2f6df0;
+  /* Risk colours, keyed by Action from risk.ts (ADR 6) */
+  --risk-safe: #30d158;
+  --risk-soft: #ff9f0a;
+  --risk-strong: #ff453a;
+  --risk-hold: #ff453a;
+  --end-call-fill: #ff3b30;
+
+  /* Light: desktop page, fraud desk, bank app */
+  --page-bg: #f5f5f7;
+  --light-content-bg: #ffffff;
+  --light-sidebar-bg: #f2f2f7;
+  --light-surface-grouped: #ffffff;
+  --light-text-primary: #1d1d1f;
+  --light-bank-text: #000000;
+  --light-text-secondary: #6e6e73;
+  --light-text-tertiary: #86868b;
+  --light-separator: #e5e5ea;
+  --light-bank-separator: #c6c6c8;
+  --light-action-blue: #007aff;
+  --light-button-fill: #0071e3;
+  --light-link: #0066cc;
+  --light-risk-soft: #ff9500;
+  --light-risk-soft-text: #c93400;
+  --light-risk-strong: #ff3b30;
+  --light-risk-strong-text: #d70015;
+  --light-risk-banner: #fff2f2;
+  --light-risk-safe: #34c759;
 
   --phone-w: 390px;
   --phone-h: 844px;
@@ -34,9 +58,9 @@ body,
 }
 
 body {
-  background: var(--bg-page);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--page-bg);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -52,7 +76,7 @@ button:disabled {
 
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--action-blue);
   outline-offset: 2px;
 }
 
