@@ -1,7 +1,7 @@
 .dash {
   min-height: 100%;
-  background: var(--bg-phone);
-  color: var(--text);
+  background: var(--phone-bg);
+  color: var(--text-primary);
   padding: 16px 16px 32px;
 }
 
@@ -26,12 +26,12 @@
 }
 
 .dash__back {
-  color: var(--accent);
+  color: var(--action-blue);
   font-size: 14px;
 }
 
 .dash__muted {
-  color: var(--text-dim);
+  color: var(--text-secondary);
   font-size: 14px;
   margin: 0;
 }
@@ -51,8 +51,8 @@
   margin: 24px auto;
   padding: 32px 16px;
   text-align: center;
-  background: var(--bg-panel);
-  border: 1px dashed var(--border);
+  background: var(--surface-grouped);
+  border: 1px dashed var(--separator);
   border-radius: 12px;
 }
 
@@ -61,7 +61,7 @@
 }
 
 .dash__empty a {
-  color: var(--accent);
+  color: var(--action-blue);
 }
 
 .dash__body {
@@ -89,7 +89,7 @@
 }
 
 [data-action='none'] {
-  --a: var(--risk-none);
+  --a: var(--risk-safe);
 }
 [data-action='soft_warning'] {
   --a: var(--risk-soft);
@@ -108,14 +108,14 @@
   flex-direction: column;
   gap: 6px;
   padding: 10px 12px;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
+  background: var(--surface-grouped);
+  border: 1px solid var(--separator);
   border-radius: 10px;
 }
 
 .dash-row[data-selected='true'] {
-  border-color: var(--accent);
-  background: var(--bg-raised);
+  border-color: var(--action-blue);
+  background: var(--surface-raised);
 }
 
 .dash-row__top,
@@ -141,7 +141,7 @@
 .dash-row__meta {
   flex-wrap: wrap;
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .dash-row__peak {
@@ -159,13 +159,13 @@
   letter-spacing: 0.04em;
   padding: 2px 6px;
   border-radius: 999px;
-  background: var(--bg-raised);
-  color: var(--text-dim);
+  background: var(--surface-raised);
+  color: var(--text-secondary);
 }
 
 .dash-badge[data-live='true'] {
   background: rgba(47, 191, 113, 0.18);
-  color: var(--risk-none);
+  color: var(--risk-safe);
 }
 
 .dash-detail {
@@ -176,8 +176,8 @@
 }
 
 .dash-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
+  background: var(--surface-grouped);
+  border: 1px solid var(--separator);
   border-radius: 12px;
   padding: 14px;
 }
@@ -187,7 +187,7 @@
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .dash-detail__head {
@@ -212,7 +212,7 @@
 .dash-detail__time {
   margin-left: auto;
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .dash-facts {
@@ -226,7 +226,7 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .dash-facts dd {
@@ -246,25 +246,25 @@
 }
 
 .dash-chart__grid {
-  stroke: var(--border);
+  stroke: var(--separator);
   stroke-width: 1;
 }
 
 .dash-chart__label {
-  fill: var(--text-dim);
+  fill: var(--text-secondary);
   font-size: 10px;
 }
 
 .dash-chart__line {
   fill: none;
-  stroke: var(--text);
+  stroke: var(--text-primary);
   stroke-width: 2;
   stroke-linejoin: round;
 }
 
 .dash-chart__dot {
   fill: var(--a);
-  stroke: var(--bg-panel);
+  stroke: var(--surface-grouped);
   stroke-width: 1.5;
 }
 
@@ -281,8 +281,8 @@
   font-size: 13px;
   padding: 4px 10px;
   border-radius: 999px;
-  background: var(--bg-raised);
-  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  border: 1px solid var(--separator);
 }
 
 .dash-hold {
@@ -291,8 +291,8 @@
   gap: 2px 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: var(--bg-raised);
-  border-left: 4px solid var(--risk-none);
+  background: var(--surface-raised);
+  border-left: 4px solid var(--risk-safe);
 }
 
 .dash-hold + .dash-hold {
@@ -316,5 +316,5 @@
 .dash-hold__meta {
   grid-column: 1 / -1;
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }

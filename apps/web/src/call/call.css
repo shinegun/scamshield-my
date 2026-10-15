@@ -21,10 +21,10 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--bg-raised);
+  background: var(--surface-raised);
   font-size: 20px;
   font-weight: 700;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .call__who {
@@ -41,11 +41,11 @@
   margin: 2px 0 0;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .call__sub[data-status='live'] {
-  color: var(--risk-none);
+  color: var(--risk-safe);
 }
 
 .call__sub[data-status='error'] {
@@ -63,14 +63,14 @@
 .chip {
   min-height: 32px;
   padding: 4px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--separator);
   border-radius: 999px;
-  background: var(--bg-panel);
+  background: var(--surface-grouped);
   font-size: 13px;
 }
 
 .chip:hover {
-  border-color: var(--accent);
+  border-color: var(--action-blue);
 }
 
 .chip--end {
@@ -86,7 +86,7 @@
   margin: 0;
   padding: 6px 16px;
   font-size: 11px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -98,9 +98,9 @@
   flex: none;
   margin: 0 16px;
   padding: 12px 14px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--separator);
   border-radius: 16px;
-  background: var(--bg-panel);
+  background: var(--surface-grouped);
 }
 
 .risk__row {
@@ -124,15 +124,15 @@
   margin-left: auto;
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--bg-raised);
+  background: var(--surface-raised);
   font-size: 11px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 [data-action='none'] {
-  --risk: var(--risk-none);
+  --risk: var(--risk-safe);
 }
 [data-action='soft_warning'] {
   --risk: var(--risk-soft);
@@ -154,7 +154,7 @@
   height: 10px;
   margin: 8px 0 12px;
   border-radius: 999px;
-  background: var(--bg-raised);
+  background: var(--surface-raised);
 }
 
 .risk__fill {
@@ -201,7 +201,7 @@
   margin: 3px 0 8px;
   font-size: 12px;
   line-height: 1.4;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .risk__steps {
@@ -216,11 +216,11 @@
   flex: 1;
   height: 4px;
   border-radius: 2px;
-  background: var(--bg-raised);
+  background: var(--surface-raised);
 }
 
 .risk__steps li.is-reached {
-  background: var(--accent);
+  background: var(--action-blue);
 }
 
 /* Transcript */
@@ -238,7 +238,7 @@
 .transcript__empty {
   margin: auto;
   font-size: 13px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .bubble {
@@ -255,13 +255,13 @@
 .bubble--caller {
   align-self: flex-start;
   border-bottom-left-radius: 4px;
-  background: var(--bubble-caller);
+  background: var(--surface-raised);
 }
 
 .bubble--user {
   align-self: flex-end;
   border-bottom-right-radius: 4px;
-  background: var(--bubble-user);
+  background: var(--action-blue);
 }
 
 .bubble__who {

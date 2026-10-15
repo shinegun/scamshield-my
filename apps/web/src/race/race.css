@@ -1,7 +1,7 @@
 .race {
   min-height: 100%;
-  background: var(--bg-phone);
-  color: var(--text);
+  background: var(--phone-bg);
+  color: var(--text-primary);
   padding: 16px 16px 32px;
 }
 
@@ -26,13 +26,13 @@
 }
 
 .race__back {
-  color: var(--accent);
+  color: var(--action-blue);
   font-size: 14px;
 }
 
 .race__lede,
 .race__muted {
-  color: var(--text-dim);
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
@@ -48,9 +48,9 @@
 }
 
 .race__chip {
-  background: var(--bg-panel);
-  color: var(--text);
-  border: 1px solid var(--border);
+  background: var(--surface-grouped);
+  color: var(--text-primary);
+  border: 1px solid var(--separator);
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 13px;
@@ -58,16 +58,16 @@
 }
 
 .race__chip--on {
-  border-color: var(--accent);
-  background: var(--bg-raised);
+  border-color: var(--action-blue);
+  background: var(--surface-raised);
 }
 
 .race__text {
   width: 100%;
   box-sizing: border-box;
-  background: var(--bg-panel);
-  color: var(--text);
-  border: 1px solid var(--border);
+  background: var(--surface-grouped);
+  color: var(--text-primary);
+  border: 1px solid var(--separator);
   border-radius: 8px;
   padding: 10px;
   font: inherit;
@@ -88,13 +88,13 @@
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .race__lang select {
-  background: var(--bg-panel);
-  color: var(--text);
-  border: 1px solid var(--border);
+  background: var(--surface-grouped);
+  color: var(--text-primary);
+  border: 1px solid var(--separator);
   border-radius: 6px;
   padding: 4px 6px;
 }
@@ -102,11 +102,11 @@
 .race__count {
   margin-right: auto;
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .race__go {
-  background: var(--accent);
+  background: var(--action-blue);
   color: #fff;
   border: 0;
   border-radius: 8px;
@@ -116,8 +116,8 @@
 }
 
 .race__go--alt {
-  background: var(--bg-raised);
-  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  border: 1px solid var(--separator);
 }
 
 .race__go:disabled,
@@ -135,7 +135,7 @@
   margin: 16px 0 8px;
   font-size: 18px;
   font-weight: 600;
-  color: var(--risk-none);
+  color: var(--risk-safe);
 }
 
 .race__cols {
@@ -151,8 +151,8 @@
 }
 
 .race__col {
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
+  background: var(--surface-grouped);
+  border: 1px solid var(--separator);
   border-radius: 12px;
   padding: 14px;
 }
@@ -166,7 +166,7 @@
 .race__model {
   margin: 2px 0 0;
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .race__latency {
@@ -178,14 +178,14 @@
 
 .race__bar {
   height: 8px;
-  background: var(--bg-raised);
+  background: var(--surface-raised);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .race__bar-fill {
   height: 100%;
-  background: var(--accent);
+  background: var(--action-blue);
   border-radius: 4px;
 }
 
@@ -202,7 +202,7 @@
 }
 
 .race__facts dt {
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .race__facts dd {
@@ -231,5 +231,5 @@
 .race__stats td {
   text-align: left;
   padding: 6px 8px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--separator);
 }

@@ -18,7 +18,7 @@
   margin: 0;
   font-size: 14px;
   line-height: 1.45;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .door__speed {
@@ -26,7 +26,7 @@
   align-items: center;
   justify-content: space-between;
   font-size: 13px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .door__cards {
@@ -45,14 +45,14 @@
   gap: 8px;
   padding: 16px;
   text-align: left;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
+  background: var(--surface-grouped);
+  border: 1px solid var(--separator);
   border-radius: 18px;
   transition: border-color 0.15s, transform 0.1s;
 }
 
 .card:hover {
-  border-color: var(--accent);
+  border-color: var(--action-blue);
 }
 
 .card:active {
@@ -82,13 +82,13 @@
 }
 
 .card__kind--safe {
-  color: var(--risk-none);
+  color: var(--risk-safe);
   background: rgba(47, 191, 113, 0.14);
 }
 
 .card__len {
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .card__title {
@@ -99,18 +99,18 @@
 .card__summary {
   font-size: 13px;
   line-height: 1.45;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .card__expect {
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .card__play {
   padding: 8px 16px;
   border-radius: 999px;
-  background: var(--accent);
+  background: var(--action-blue);
   color: #fff;
   font-size: 14px;
   font-weight: 700;
@@ -122,7 +122,7 @@
   flex-direction: column;
   gap: 6px;
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .door__foot p {
@@ -131,7 +131,7 @@
 
 .door__dash {
   display: none;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 @media (max-width: 480px) {
@@ -144,7 +144,7 @@
   display: inline-flex;
   padding: 2px;
   border-radius: 999px;
-  background: var(--bg-raised);
+  background: var(--surface-raised);
 }
 
 .speed__option {
@@ -153,12 +153,12 @@
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: var(--text-dim);
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 600;
 }
 
 .speed__option[aria-pressed='true'] {
-  background: var(--accent);
+  background: var(--action-blue);
   color: #fff;
 }
