@@ -1,14 +1,36 @@
-import { useEffect, useRef } from 'react';
+import type { Action } from '@scamshield/shared';
+import { useEffect, useMemo, useRef } from 'react';
 import { useCall } from './CallProvider';
-import { formatClock } from './labels';
+import { flagLabel } from './flagLabels';
+import { langOf } from './labels';
+import { callerSignals } from './signals';
 
+const SIGNAL_TONE: Record<Action, string> = {
+  none: 'secondary',
+  soft_warning: 'soft',
+  strong_warning: 'strong',
+  hold_transfers: 'strong',
+};
+
+// Live captions: the newest caller line is large, earlier lines fade.
 export function TranscriptView() {
-  const { transcript, status, script } = useCall();
+  const { transcript, riskHistory, status, script } = useCall();
   const endRef = useRef<HTMLDivElement>(null);
+  const lang = langOf(script?.language);
+  const signals = useMemo(() => callerSignals(transcript, riskHistory), [transcript, riskHistory]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    endRef.current?.scrollIntoView({ block: 'end', behavior: reduced ? 'auto' : 'smooth' });
   }, [transcript.length]);
+
+  let newest = -1;
+  for (let i = transcript.length - 1; i >= 0; i--) {
+    if (transcript[i]?.speaker === 'caller') {
+      newest = i;
+      break;
+    }
+  }
 
   return (
     <section className="transcript" aria-label="Live transcript" aria-live="polite">
@@ -17,14 +39,20 @@ export function TranscriptView() {
           {status === 'connecting' ? 'Connecting to ScamShield…' : 'Waiting for the first words…'}
         </p>
       )}
-      {transcript.map((line, i) => (
-        <div key={i} className={`bubble bubble--${line.speaker}`} lang={script?.language}>
-          <span className="bubble__who">
-            {line.speaker === 'caller' ? 'Caller' : 'You'} · {formatClock(line.atSec)}
-          </span>
-          <span className="bubble__text">{line.text}</span>
-        </div>
-      ))}
+      {transcript.map((line, i) => {
+        const tone = i === newest ? 'newest' : i > newest ? 'secondary' : newest - i <= 2 ? 'secondary' : 'tertiary';
+        const sig = line.speaker === 'caller' ? signals.get(i) : undefined;
+        return (
+          <div key={i} className="caption" data-tone={tone} lang={script?.language}>
+            {line.speaker === 'user' ? `You: ${line.text}` : line.text}
+            {sig && sig.flags.length > 0 && (
+              <div className="caption__signals" data-tone={SIGNAL_TONE[sig.action]}>
+                {sig.flags.map((f) => flagLabel(f, lang)).join(' · ')}
+              </div>
+            )}
+          </div>
+        );
+      })}
       <div ref={endRef} />
     </section>
   );
