@@ -50,6 +50,8 @@ gcloud builds submit . --config services/pipeline/cloudbuild.yaml --substitution
 
 # One instance, always on: call state lives in memory (ADR 8), and a judge
 # should never meet a cold start (#16). WebSocket calls can run up to an hour.
+# Startup CPU boost lets the spoken-warning clips record at boot (#23); outside
+# requests Cloud Run throttles the CPU.
 gcloud run deploy "$SERVICE" \
   --image "$IMAGE" \
   --region "$REGION" \
@@ -58,7 +60,7 @@ gcloud run deploy "$SERVICE" \
   --min-instances 1 --max-instances 1 \
   --timeout 3600 \
   --session-affinity \
-  --cpu 1 --memory 512Mi \
+  --cpu 1 --memory 512Mi --cpu-boost \
   --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT,GEMINI_LOCATION=$REGION" \
   --set-secrets "TYPESAFE_API_KEY=$SECRET:latest"
 
