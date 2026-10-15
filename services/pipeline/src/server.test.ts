@@ -55,11 +55,13 @@ class Client {
 
   static async connect(port: number, path = '/call'): Promise<Client> {
     const ws = new WebSocket(`ws://127.0.0.1:${port}${path}`);
+    // Listen before the socket opens: the server may send (and close) at once.
+    const client = new Client(ws);
     await new Promise((resolve, reject) => {
       ws.once('open', resolve);
       ws.once('error', reject);
     });
-    return new Client(ws);
+    return client;
   }
 
   send(message: ClientMessage | string): void {
@@ -84,6 +86,16 @@ class Client {
 
   close(): void {
     this.ws.close();
+  }
+
+  // Resolves with the close code once the server closes the socket.
+  closed(): Promise<number> {
+    if (this.ws.readyState === WebSocket.CLOSED) return Promise.resolve(-1);
+    return new Promise((resolve) => this.ws.once('close', (code) => resolve(code)));
+  }
+
+  get isOpen(): boolean {
+    return this.ws.readyState === WebSocket.OPEN;
   }
 }
 
@@ -374,5 +386,71 @@ describe('warnings', () => {
       action: 'hold_transfers',
       text: FALLBACK_WARNINGS.en.hold_transfers,
     });
+  });
+});
+
+describe('caps for a public link (#18)', () => {
+  async function capped(maxCalls: number, maxCallMs: number) {
+    const server = await createServer({ scorer: fakeScorer([decision('none')]), port: 0, maxCalls, maxCallMs });
+    closers.push(() => server.close());
+    const open = async () => {
+      const client = await Client.connect(server.port);
+      closers.unshift(() => client.close());
+      return client;
+    };
+    return { server, open };
+  }
+
+  it('refuses a call beyond the concurrent limit, and accepts one again after a call ends', async () => {
+    const { open } = await capped(2, 60_000);
+    const a = await open();
+    const b = await open();
+    a.send(START);
+    b.send(START);
+    await a.next('session.started');
+    await b.next('session.started');
+
+    const c = await open();
+    expect((await c.next('error')).message).toMatch(/Too many calls/);
+    expect(await c.closed()).toBe(1013);
+    expect(a.isOpen && b.isOpen).toBe(true);
+
+    a.send({ type: 'session.end' });
+    await a.closed();
+    await new Promise((r) => setTimeout(r, 20));
+    const d = await open();
+    d.send(START);
+    await d.next('session.started');
+  });
+
+  it('ends a call that runs past the time limit, and frees its place', async () => {
+    const { open } = await capped(1, 150);
+    const a = await open();
+    a.send(START);
+    await a.next('session.started');
+    expect((await a.next('error')).message).toMatch(/limit/);
+    expect(await a.closed()).toBe(1013);
+
+    await new Promise((r) => setTimeout(r, 20));
+    const b = await open();
+    b.send(START);
+    await b.next('session.started');
+  });
+
+  it('does not count clock.skip towards the time limit', async () => {
+    const { open } = await capped(1, 400);
+    const a = await open();
+    a.send(START);
+    await a.next('session.started');
+    a.send({ type: 'clock.skip', seconds: 3601 });
+    expect((await a.next('risk')).action).toBe('soft_warning');
+    expect(a.isOpen).toBe(true);
+  });
+
+  it('closes the socket on an oversized message', async () => {
+    const { open } = await capped(1, 60_000);
+    const a = await open();
+    a.send(say('x'.repeat(20_000)));
+    expect(await a.closed()).toBe(1009);
   });
 });
