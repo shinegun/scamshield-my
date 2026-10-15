@@ -6,6 +6,7 @@ import {
   dismissBanner,
   dismissOverlay,
   initialWarningUi,
+  nativeStrings,
   reopenOverlay,
   warningStrings,
 } from './warningView';
@@ -124,5 +125,19 @@ describe('warningStrings', () => {
     expect(warningStrings('hold_transfers', 'ms').secondary).toBe(line);
     expect(warningStrings('hold_transfers', 'en').secondary).toBe(line);
     expect(warningStrings('strong_warning', 'en').secondary).toBeUndefined();
+  });
+});
+
+describe('nativeStrings', () => {
+  it('titles the card by action and language', () => {
+    expect(nativeStrings('soft_warning', 'en').cardTitle).toBe('Possible scam');
+    expect(nativeStrings('strong_warning', 'en').cardTitle).toBe('Likely scam');
+    expect(nativeStrings('hold_transfers', 'ms').cardTitle).toBe('Kemungkinan besar penipuan');
+    expect(nativeStrings('soft_warning', 'ms').cardTitle).toBe('Mungkin penipuan');
+  });
+
+  it('translates the alert labels', () => {
+    expect(nativeStrings('strong_warning', 'ms').endCall).toBe('Tamatkan Panggilan');
+    expect(nativeStrings('strong_warning', 'en').why).toBe('Why am I seeing this?');
   });
 });

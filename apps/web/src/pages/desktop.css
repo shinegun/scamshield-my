@@ -55,3 +55,8 @@
 .desk__phone .phone {
   height: min(780px, calc(100dvh - 52px - 64px));
 }
+
+/* Below 1100 px (or idle) the desktop wrappers stay in the tree but add no boxes. */
+.desk-off {
+  display: contents;
+}

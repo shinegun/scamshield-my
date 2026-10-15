@@ -75,7 +75,9 @@ export function InspectorPanel() {
           }
         >
           <line x1="0" x2="860" y1={chart.yAt(DEFAULT_THRESHOLDS.soft)} y2={chart.yAt(DEFAULT_THRESHOLDS.soft)} stroke="var(--light-risk-soft)" strokeWidth="1" strokeDasharray="3 5" />
-          <line x1="0" x2="860" y1={chart.yAt(DEFAULT_THRESHOLDS.hold)} y2={chart.yAt(DEFAULT_THRESHOLDS.hold)} stroke="var(--light-risk-strong)" strokeWidth="1" strokeDasharray="3 5" />
+          <line x1="0" x2="860" y1={chart.yAt(DEFAULT_THRESHOLDS.strong)} y2={chart.yAt(DEFAULT_THRESHOLDS.strong)} stroke="var(--light-risk-strong)" strokeWidth="1" strokeDasharray="3 5" />
+          {/* Hold is red like strong; longer dashes tell the two apart. */}
+          <line x1="0" x2="860" y1={chart.yAt(DEFAULT_THRESHOLDS.hold)} y2={chart.yAt(DEFAULT_THRESHOLDS.hold)} stroke="var(--light-risk-strong)" strokeWidth="1" strokeDasharray="10 4" />
           {view.actionChanges.map((c) => (
             <line
               key={`${c.atSec}-${c.action}`}
