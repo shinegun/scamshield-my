@@ -194,3 +194,20 @@
 .ctl__btn--end:disabled {
   opacity: 0.4;
 }
+
+/* The phone is shorter than 844px when the window is under ~916px tall
+   (phone.css). There the decorative speaker/mute/keypad row would squeeze
+   the transcript to nothing, so keep only a smaller End button. */
+@media (max-height: 915px) {
+  .controls {
+    margin-top: 8px;
+    row-gap: 0;
+  }
+  .ctl[aria-hidden='true'] {
+    display: none;
+  }
+  .ctl__btn {
+    width: 56px;
+    height: 56px;
+  }
+}
