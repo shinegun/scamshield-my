@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Native, Jev vs Gemini</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#2997FF;text-decoration:none}
+.sys{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif}
+.lane{display:grid;grid-template-columns:140px minmax(0,1fr) 200px;gap:28px;align-items:center}
+.trk{position:relative;height:44px}
+.run{position:absolute;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:#fff;opacity:.55}
+.chip{height:34px;padding:0 16px;border-radius:999px;border:0;background:#1C1C1E;color:#D1D1D6;font:400 14px -apple-system,BlinkMacSystemFont,sans-serif}
+</style>
+</helmet>
+<div class="sys" style="width:1440px;height:900px;box-sizing:border-box;background:#000;color:#F5F5F7;display:flex;flex-direction:column;padding:0 96px">
+  <nav style="height:52px;display:flex;align-items:center;gap:28px;font-size:14px">
+    <div style="font-weight:600;font-size:16px">Jev vs Gemini</div>
+    <a href="#" style="margin-left:auto;color:#86868B">Fraud desk</a><a href="#" style="color:#86868B">Back to the phone</a>
+  </nav>
+
+  <div style="margin-top:56px">
+    <div style="font-size:21px;color:#86868B">The same line of a Malay scam call, sent to both, five times.</div>
+    <h1 style="margin:12px 0 0;font-size:80px;font-weight:700;letter-spacing:-.04em;line-height:1">Jev decides in <span style="color:#30D158">235 ms</span>.</h1>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-top:40px">
+    <button class="chip" style="background:#F5F5F7;color:#000">Malay · asks for money</button>
+    <button class="chip">Malay · opening</button>
+    <button class="chip">Manglish · asks for money</button>
+    <button class="chip">Innocent call</button>
+  </div>
+
+  <div style="margin-top:56px;display:flex;flex-direction:column;gap:28px">
+    <div class="lane">
+      <div style="font-size:24px;font-weight:600">Jev</div>
+      <div class="trk">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:14.7%;border-radius:8px;background:#30D158"></div>
+        <div class="run" style="left:14.1%"></div><div class="run" style="left:14.4%"></div><div class="run" style="left:15.1%"></div><div class="run" style="left:15.8%"></div>
+      </div>
+      <div><div style="font-size:40px;font-weight:700;letter-spacing:-.02em">235 ms</div><div style="font-size:14px;color:#86868B">225–253 · 5/5 answered</div></div>
+    </div>
+    <div class="lane">
+      <div style="font-size:24px;font-weight:600">Gemini</div>
+      <div class="trk">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:55.9%;border-radius:8px;background:#48484A"></div>
+        <div class="run" style="left:50.1%"></div><div class="run" style="left:53.2%"></div><div class="run" style="left:61%"></div><div class="run" style="left:93.8%"></div>
+      </div>
+      <div><div style="font-size:40px;font-weight:700;letter-spacing:-.02em;color:#A1A1A6">895 ms</div><div style="font-size:14px;color:#86868B">802 ms–1.5 s · 5/5 answered</div></div>
+    </div>
+    <div class="lane"><div></div><div style="display:flex;justify-content:space-between;font-size:13px;color:#6E6E73"><span>0</span><span>0.4 s</span><span>0.8 s</span><span>1.2 s</span><span>1.6 s</span></div><div></div></div>
+  </div>
+
+  <div style="margin-top:auto;margin-bottom:48px;display:flex;align-items:center;gap:16px">
+    <button style="height:44px;padding:0 22px;border-radius:999px;border:0;background:#0071E3;color:#fff;font:500 16px -apple-system,BlinkMacSystemFont,sans-serif">Race again</button>
+    <button style="height:44px;padding:0 22px;border-radius:999px;border:0;background:#1C1C1E;color:#F5F5F7;font:500 16px -apple-system,BlinkMacSystemFont,sans-serif">Run 5 times</button>
+    <div style="margin-left:auto;font-size:14px;color:#86868B">Bars show the median. Dots are single runs.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
