@@ -1,5 +1,6 @@
 import { COLLECTIONS } from '@scamshield/shared';
 import { useEffect, useState } from 'react';
+import { parseTicks, type Tick } from './desk';
 import { getDb } from './firebase';
 import { toHoldViews, toRiskPoints, toSessionView, type HoldView, type RiskPoint, type Raw, type SessionView } from './view';
 
@@ -48,6 +49,7 @@ function useQuery<T>(
 
 const NO_SESSIONS: SessionView[] = [];
 const NO_POINTS: RiskPoint[] = [];
+const NO_TICKS: Tick[] = [];
 const NO_HOLDS: HoldView[] = [];
 
 export function useSessions(): Loadable<SessionView[]> {
@@ -67,6 +69,16 @@ export function useRisk(sessionId: string | null): Loadable<RiskPoint[]> {
     ({ collection, query, orderBy }, db) =>
       query(collection(db, COLLECTIONS.sessions, sessionId!, COLLECTIONS.risk), orderBy('atSec', 'asc')),
     (docs) => toRiskPoints(docs.map((d) => d.data)),
+  );
+}
+
+export function useRiskTicks(sessionId: string | null): Loadable<Tick[]> {
+  return useQuery(
+    sessionId && `ticks/${sessionId}`,
+    NO_TICKS,
+    ({ collection, query, orderBy }, db) =>
+      query(collection(db, COLLECTIONS.sessions, sessionId!, COLLECTIONS.risk), orderBy('atSec', 'asc')),
+    (docs) => parseTicks(docs.map((d) => d.data)),
   );
 }
 
