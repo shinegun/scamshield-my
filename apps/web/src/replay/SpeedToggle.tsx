@@ -1,9 +1,9 @@
 import { useCall } from '../call/CallProvider';
 
-export function SpeedToggle() {
+export function SpeedToggle({ light = false }: { light?: boolean }) {
   const { speed, setSpeed } = useCall();
   return (
-    <div className="speed" role="group" aria-label="Replay speed">
+    <div className={light ? 'speed speed--light' : 'speed'} role="group" aria-label="Replay speed">
       {([1, 2] as const).map((value) => (
         <button
           key={value}
