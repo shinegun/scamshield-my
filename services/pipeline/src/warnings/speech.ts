@@ -13,6 +13,9 @@ export interface WarningSpeech {
   // A `data:audio/mpeg;base64,...` URL, or undefined when the clip is not
   // ready, failed, or the action is not spoken.
   audioFor(action: WarningAction, language: string): string | undefined;
+  // Records any clip that is still missing. Called when a call starts: on Cloud
+  // Run the CPU is throttled outside requests, so recording at boot can stall.
+  warm?(): void;
 }
 
 export const NO_SPEECH: WarningSpeech = { audioFor: () => undefined };
@@ -52,11 +55,24 @@ export class TtsWarningSpeech implements WarningSpeech {
     this.project = opts.project ?? process.env.GOOGLE_CLOUD_PROJECT;
     this.timeoutMs = opts.timeoutMs ?? TIMEOUT_MS;
     this.log = opts.log ?? ((line) => console.log(line));
+    this.ready = this.warm();
+  }
+
+  private readonly recording = new Set<string>();
+
+  // Starts recording every clip that is neither recorded nor being recorded.
+  // Resolves when those finish, successfully or not; never rejects.
+  warm(): Promise<void> {
     const jobs: Promise<void>[] = [];
     for (const language of ['ms', 'en'] as const) {
-      for (const action of SPOKEN) jobs.push(this.record(language, action));
+      for (const action of SPOKEN) {
+        const name = `${language}:${action}`;
+        if (this.clips.has(name) || this.recording.has(name)) continue;
+        this.recording.add(name);
+        jobs.push(this.record(language, action).finally(() => this.recording.delete(name)));
+      }
     }
-    this.ready = Promise.all(jobs).then(() => undefined);
+    return Promise.all(jobs).then(() => undefined);
   }
 
   audioFor(action: WarningAction, language: string): string | undefined {
@@ -75,7 +91,7 @@ export class TtsWarningSpeech implements WarningSpeech {
   }
 
   private async synthesize(language: WarningLanguage, text: string): Promise<string> {
-    const token = await this.getToken();
+    const token = await withTimeout(this.getToken(), this.timeoutMs, 'access token');
     const headers: Record<string, string> = {
       'content-type': 'application/json',
       authorization: `Bearer ${token}`,
@@ -103,4 +119,12 @@ export class TtsWarningSpeech implements WarningSpeech {
 export function createWarningSpeech(env: NodeJS.ProcessEnv = process.env): WarningSpeech {
   const on = Boolean(env.K_SERVICE) || env.SPEECH === 'on';
   return on ? new TtsWarningSpeech() : NO_SPEECH;
+}
+
+function withTimeout<T>(p: Promise<T>, ms: number, what: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${what} timed out after ${ms / 1000} s`)), ms);
+  });
+  return Promise.race([p, timeout]).finally(() => clearTimeout(timer));
 }

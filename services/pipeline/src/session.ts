@@ -234,6 +234,7 @@ export class CallSession {
   }
 
   private start(message: Extract<ClientMessage, { type: 'session.start' }>): void {
+    this.opts.speech?.warm?.();
     this.started = {
       sessionId: randomUUID(),
       startedAt: this.opts.now(),
