@@ -49,3 +49,9 @@
 .desk__phone .stage__link { display: none; }
 .desk__phone { display: flex; justify-content: center; align-items: flex-start; }
 .desk .risk-line { display: none; }
+
+/* Fit the phone under the nav and grid padding, so a 768 px tall laptop
+   shows the whole phone without scrolling. */
+.desk__phone .phone {
+  height: min(780px, calc(100dvh - 52px - 64px));
+}
