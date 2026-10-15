@@ -30,8 +30,9 @@ fi
 if ! gcloud iam service-accounts describe "$SA" >/dev/null 2>&1; then
   gcloud iam service-accounts create scamshield-pipeline --display-name "ScamShield pipeline (Cloud Run)"
 fi
-# Gemini on Vertex AI (ADR 8) and Firestore writes (#13).
-for role in roles/aiplatform.user roles/datastore.user; do
+# Gemini on Vertex AI (ADR 8), Firestore writes (#13), and Cloud Text-to-Speech
+# for the spoken warning (#23), which bills this project via x-goog-user-project.
+for role in roles/aiplatform.user roles/datastore.user roles/serviceusage.serviceUsageConsumer; do
   gcloud projects add-iam-policy-binding "$PROJECT" --member "serviceAccount:$SA" --role "$role" \
     --condition None >/dev/null
 done
