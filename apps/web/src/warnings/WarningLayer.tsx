@@ -1,4 +1,5 @@
-import { useEffect, useReducer, useRef } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
+import { muteLabel, nextSpoken } from './speak';
 import { useCall, type WarningMessage } from '../call/CallProvider';
 import {
   bannerTone,
@@ -6,6 +7,7 @@ import {
   dismissBanner,
   dismissOverlay,
   initialWarningUi,
+  isOverlay,
   reopenOverlay,
   warningStrings,
   type WarningUiState,
@@ -38,6 +40,40 @@ function WarningLayerInner({ warnings }: { warnings: WarningMessage[] }) {
   const { banner, overlay, pill } = deriveWarningView(warnings, ui);
   const dismissRef = useRef<HTMLButtonElement>(null);
 
+  // Spoken warning: each new strong/hold clip plays once; a newer one stops
+  // the one still playing. Warnings already present at mount are not replayed.
+  const [muted, setMuted] = useState(false);
+  const mutedRef = useRef(false);
+  const handledRef = useRef(warnings.length);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  useEffect(() => {
+    const { play, handled } = nextSpoken(warnings, handledRef.current);
+    handledRef.current = handled;
+    if (!play || mutedRef.current) return;
+    audioRef.current?.pause();
+    try {
+      const audio = new Audio(play);
+      audioRef.current = audio;
+      audio.play().catch(() => {});
+    } catch {
+      // No audio support: the warning is still shown.
+    }
+  }, [warnings]);
+  useEffect(() => () => audioRef.current?.pause(), []);
+  const toggleMute = () => {
+    const next = !muted;
+    mutedRef.current = next;
+    setMuted(next);
+    if (next) audioRef.current?.pause();
+  };
+  const hasAudio = warnings.some((w) => isOverlay(w) && w.audioUrl);
+  const latestLanguage = warnings[warnings.length - 1]?.language ?? 'en';
+  const muteButton = hasAudio && (
+    <button type="button" className="warn-mute" aria-pressed={muted} lang={latestLanguage} onClick={toggleMute}>
+      {muteLabel(muted, latestLanguage)}
+    </button>
+  );
+
   // Move focus to the dismiss button whenever an overlay opens (or changes).
   useEffect(() => {
     if (overlay) dismissRef.current?.focus();
@@ -67,6 +103,7 @@ function WarningLayerInner({ warnings }: { warnings: WarningMessage[] }) {
             </div>
           )}
         </div>
+        {!overlay && muteButton}
         {pill && (
           <button type="button" className="warn-pill" data-action={pill.warning.action} onClick={() => dispatch({ type: 'reopen' })}>
             {pill.label}
@@ -93,6 +130,7 @@ function WarningLayerInner({ warnings }: { warnings: WarningMessage[] }) {
             <p className="warn-overlay__text">{overlay.text}</p>
             {strings.secondary && <p className="warn-overlay__secondary">{strings.secondary}</p>}
           </div>
+          {muteButton}
           <button
             ref={dismissRef}
             type="button"

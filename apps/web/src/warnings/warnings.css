@@ -184,6 +184,23 @@
   font-weight: 800;
 }
 
+.warn-mute {
+  flex: none;
+  align-self: center;
+  min-height: 32px;
+  padding: 4px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+.warn-mute[aria-pressed='true'] {
+  background: #fff;
+  color: #7a0f1d;
+}
+
 @keyframes warn-fade-in {
   from {
     opacity: 0;
