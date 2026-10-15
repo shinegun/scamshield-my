@@ -24,6 +24,8 @@ What the demo shows, all checked live on 15 October:
 - **Race panel:** Malay money-request chunk, 5 runs. Jev median **235 ms** (225–253), Gemini median **895 ms** (802 ms–1.5 s), 5/5 answered each. Jev is about 4x faster.
 - **Health check:** connect 152 ms, Jev about 222 ms per line, scam held, innocent quiet.
 
+**Restyle, 15 October (PRs #60–#73):** the web app now uses the Native design in `docs/design` (iOS-style phone, light desktop, fraud desk and bank). The demo path is: phone rings → Accept → captions and the "What ScamShield hears" panel → notification card → spoken scam alert → **Continue call** → bank → "Transfer paused" → End → call summary. 213 tests pass. Every screen fits a 1440×768 window without scrolling. Screenshots are in `docs/design/screenshots/`. Drafts for issues 26, 29 and 30 are in `docs/video-script.md`, `docs/deck.md` and `docs/submission-description.md`.
+
 ## Blocker: the repo must be public (issue 25)
 
 `shinegun/scamshield-my` is private. Ilham has push but not admin, so **only Aqil can make it public** (Settings → General → Danger zone → Change visibility) or give Ilham admin. The rules ask for a "GitHub Public Repository". Do it by Saturday.
