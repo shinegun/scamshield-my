@@ -11,13 +11,15 @@ export interface WarningUiState {
   overlaysSeen: number;
   // The user tapped the pill to reopen the latest overlay.
   reopened: boolean;
-  bannerDismissed: boolean;
+  // Highest action level (see LEVEL) whose banner the user closed; a higher
+  // one brings the banner back.
+  bannerDismissedLevel: number;
 }
 
 export const initialWarningUi: WarningUiState = {
   overlaysSeen: 0,
   reopened: false,
-  bannerDismissed: false,
+  bannerDismissedLevel: 0,
 };
 
 export interface WarningStrings {
@@ -32,6 +34,15 @@ export interface WarningView {
   banner?: WarningMessage;
   overlay?: OverlayWarning;
   pill?: { warning: OverlayWarning; label: string };
+}
+
+const LEVEL: Record<WarningMessage['action'], number> = { soft_warning: 1, strong_warning: 2, hold_transfers: 3 };
+
+export type BannerTone = 'soft' | 'strong';
+
+// Soft is yellow; strong and hold are red.
+export function bannerTone(action: WarningMessage['action']): BannerTone {
+  return action === 'soft_warning' ? 'soft' : 'strong';
 }
 
 export const NSRC_LINE = 'National Scam Response Centre (NSRC): 997';
@@ -64,10 +75,11 @@ export function warningStrings(action: OverlayWarning['action'], language: strin
 export function deriveWarningView(warnings: WarningMessage[], ui: WarningUiState): WarningView {
   const overlays = warnings.filter(isOverlay);
   const latestOverlay = overlays[overlays.length - 1];
-  const latestSoft = [...warnings].reverse().find((w) => w.action === 'soft_warning');
+  const latest = warnings[warnings.length - 1];
 
   const view: WarningView = {};
-  if (latestSoft && !ui.bannerDismissed) view.banner = latestSoft;
+  // The banner always carries the latest warning's text.
+  if (latest && LEVEL[latest.action] > ui.bannerDismissedLevel) view.banner = latest;
 
   if (latestOverlay) {
     // Each overlay shows once on arrival; the pill reopens the latest one.
@@ -89,6 +101,7 @@ export function reopenOverlay(ui: WarningUiState): WarningUiState {
   return { ...ui, reopened: true };
 }
 
-export function dismissBanner(ui: WarningUiState): WarningUiState {
-  return { ...ui, bannerDismissed: true };
+export function dismissBanner(ui: WarningUiState, warnings: WarningMessage[]): WarningUiState {
+  const latest = warnings[warnings.length - 1];
+  return { ...ui, bannerDismissedLevel: latest ? LEVEL[latest.action] : ui.bannerDismissedLevel };
 }

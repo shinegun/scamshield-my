@@ -1,6 +1,6 @@
 import { RED_FLAG_KEYS, emptySession, type FlagScores } from '@scamshield/shared';
 import { describe, expect, it } from 'vitest';
-import { FLAG_PHRASES, flagPhrases, holdExplanation } from './explain';
+import { FLAG_PHRASES, FLAG_PHRASES_MS, flagPhrases, holdExplanation, holdStrings } from './explain';
 
 function flags(overrides: Partial<FlagScores>): FlagScores {
   return { ...emptySession().peakFlags, ...overrides };
@@ -27,5 +27,15 @@ describe('flag phrases', () => {
     expect(scam.scamLabel).toBe('Fake police');
     expect(scam.phrases).toEqual([FLAG_PHRASES.demands_secrecy]);
     expect(holdExplanation({ scamType: 'none', flags: flags({}) }).scamLabel).toBeUndefined();
+  });
+
+  it('explains in Malay when asked', () => {
+    expect(Object.keys(FLAG_PHRASES_MS).sort()).toEqual([...RED_FLAG_KEYS].sort());
+    const ms = holdExplanation({ scamType: 'fake_police', flags: flags({ demands_secrecy: 1 }) }, 'ms');
+    expect(ms.scamLabel).toBe('Polis palsu');
+    expect(ms.phrases).toEqual([FLAG_PHRASES_MS.demands_secrecy]);
+    expect(holdStrings('ms').title).toBe('Pindahan ditahan untuk melindungi anda');
+    expect(holdStrings('ms').body('RM500.00', 'Ali', 'RM1,000.00')).toContain('RM500.00');
+    expect(holdStrings().title).toBe('Transfer held to protect you');
   });
 });

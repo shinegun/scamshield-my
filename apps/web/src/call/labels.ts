@@ -1,4 +1,4 @@
-import type { Action, ScamStage, ScamType } from '@scamshield/shared';
+import { SCAM_STAGES, type Action, type ScamStage, type ScamType } from '@scamshield/shared';
 import type { RiskMessage } from './state';
 
 const ACRONYMS: Record<string, string> = {
@@ -18,8 +18,52 @@ function humanize(key: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-export const stageLabel = (stage: ScamStage): string => humanize(stage === 'none' ? 'no_scam_signs' : stage);
-export const scamTypeLabel = (type: ScamType): string => humanize(type);
+export type Lang = 'ms' | 'en';
+
+// "ms", "ms-MY" -> 'ms'; anything else -> 'en'.
+export function langOf(bcp47: string | undefined): Lang {
+  return bcp47?.toLowerCase().startsWith('ms') ? 'ms' : 'en';
+}
+
+const STAGE_LABELS_MS: Record<ScamStage, string> = {
+  none: 'Tiada tanda penipuan',
+  authority_setup: 'Menyamar sebagai pihak berkuasa',
+  victim_framing: 'Mendakwa anda terlibat',
+  family_pressure: 'Menekan melalui keluarga',
+  isolation: 'Mengasingkan anda',
+  identity_request: 'Meminta maklumat peribadi',
+  financial_request: 'Meminta wang atau butiran bank',
+};
+
+const STAGE_DESCRIPTIONS_MS: Record<ScamStage, string> = {
+  none: 'Panggilan biasa, atau belum ada tanda penipuan.',
+  authority_setup: 'Pemanggil mengaku daripada badan rasmi atau syarikat, atau menyambungkan panggilan ke agensi lain.',
+  victim_framing: 'Pemanggil mendakwa identiti, nombor atau akaun anda disalahgunakan dan kononnya mahu membantu.',
+  family_pressure: 'Pemanggil membabitkan ibu bapa atau keluarga anda dalam kes ini.',
+  isolation: 'Pemanggil menyuruh anda kekal dalam talian atau merahsiakan panggilan ini.',
+  identity_request: 'Pemanggil meminta nombor IC, gambar IC, swafoto atau butiran peribadi lain.',
+  financial_request: 'Pemanggil meminta butiran bank, kod OTP atau TAC, pindahan wang atau pemasangan aplikasi.',
+};
+
+const SCAM_TYPE_LABELS_MS: Record<ScamType, string> = {
+  none: 'Tiada tanda penipuan',
+  fake_police: 'Polis palsu',
+  fake_bank_or_bnm: 'Bank atau BNM palsu',
+  fake_lhdn_or_gov: 'LHDN atau agensi kerajaan palsu',
+  fake_mcmc_or_telco: 'MCMC atau telco palsu',
+  macau_scam: 'Scam Macau',
+  parcel_courier: 'Penipuan bungkusan kurier',
+  investment: 'Penipuan pelaburan',
+  love_scam: 'Scam cinta',
+  job_scam: 'Penipuan kerja',
+};
+
+export const stageLabel = (stage: ScamStage, lang: Lang = 'en'): string =>
+  lang === 'ms' ? STAGE_LABELS_MS[stage] : humanize(stage === 'none' ? 'no_scam_signs' : stage);
+export const stageDescription = (stage: ScamStage, lang: Lang = 'en'): string =>
+  lang === 'ms' ? STAGE_DESCRIPTIONS_MS[stage] : SCAM_STAGES[stage];
+export const scamTypeLabel = (type: ScamType, lang: Lang = 'en'): string =>
+  lang === 'ms' ? SCAM_TYPE_LABELS_MS[type] : humanize(type);
 
 export const ACTION_LABELS: Record<Action, string> = {
   none: 'No warning',
@@ -27,6 +71,16 @@ export const ACTION_LABELS: Record<Action, string> = {
   strong_warning: 'Strong warning',
   hold_transfers: 'Transfers held',
 };
+
+export const ACTION_LABELS_MS: Record<Action, string> = {
+  none: 'Tiada amaran',
+  soft_warning: 'Amaran awal',
+  strong_warning: 'Amaran penipuan',
+  hold_transfers: 'Pindahan ditahan',
+};
+
+export const actionLabel = (action: Action, lang: Lang = 'en'): string =>
+  lang === 'ms' ? ACTION_LABELS_MS[action] : ACTION_LABELS[action];
 
 export function formatClock(totalSec: number): string {
   const sec = Math.max(0, Math.floor(totalSec));

@@ -45,7 +45,12 @@ export function ReplayFrontDoor() {
 function ScriptCard({ script, onPlay }: { script: CallScript; onPlay: () => void }) {
   const scam = script.expectedAction !== 'none';
   return (
-    <button type="button" className="card" onClick={onPlay}>
+    <button
+      type="button"
+      className="card"
+      aria-label={`Play: ${script.title} (${scam ? 'scam' : 'innocent'})`}
+      onClick={onPlay}
+    >
       <span className="card__top">
         <span className={`card__kind card__kind--${scam ? 'scam' : 'safe'}`}>
           {scam ? 'Scam call' : 'Innocent call'}

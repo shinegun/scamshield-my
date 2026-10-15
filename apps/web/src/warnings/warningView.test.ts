@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { WarningMessage } from '../call/state';
 import {
+  bannerTone,
   deriveWarningView,
   dismissBanner,
   dismissOverlay,
@@ -26,12 +27,12 @@ describe('deriveWarningView', () => {
     expect(view.pill).toBeUndefined();
   });
 
-  it('shows the overlay for strong after soft, banner kept underneath', () => {
+  it('shows the overlay for strong after soft, banner following the latest warning', () => {
     const soft = warning('soft_warning');
     const strong = warning('strong_warning');
     const view = deriveWarningView([soft, strong], initialWarningUi);
     expect(view.overlay).toBe(strong);
-    expect(view.banner).toBe(soft);
+    expect(view.banner).toBe(strong);
     expect(view.pill).toBeUndefined();
   });
 
@@ -62,8 +63,37 @@ describe('deriveWarningView', () => {
   });
 
   it('hides the banner once dismissed', () => {
-    const view = deriveWarningView([warning('soft_warning')], dismissBanner(initialWarningUi));
+    const warnings = [warning('soft_warning')];
+    const view = deriveWarningView(warnings, dismissBanner(initialWarningUi, warnings));
     expect(view).toEqual({});
+  });
+
+  it('banner text follows the latest warning, through to hold', () => {
+    const soft = warning('soft_warning', 'en', 'careful');
+    const strong = warning('strong_warning', 'en', 'stop');
+    const hold = warning('hold_transfers', 'en', 'held');
+    expect(deriveWarningView([soft], initialWarningUi).banner?.text).toBe('careful');
+    expect(deriveWarningView([soft, strong], initialWarningUi).banner?.text).toBe('stop');
+    expect(deriveWarningView([soft, strong, hold], initialWarningUi).banner?.text).toBe('held');
+  });
+
+  it('a dismissed banner comes back on a higher level only', () => {
+    const soft = warning('soft_warning');
+    const soft2 = warning('soft_warning', 'en', 'again');
+    const strong = warning('strong_warning');
+    const hold = warning('hold_transfers');
+    const ui = dismissBanner(initialWarningUi, [soft]);
+    expect(deriveWarningView([soft, soft2], ui).banner).toBeUndefined();
+    expect(deriveWarningView([soft, soft2, strong], ui).banner).toBe(strong);
+    const ui2 = dismissBanner(ui, [soft, strong]);
+    expect(deriveWarningView([soft, strong, strong], ui2).banner).toBeUndefined();
+    expect(deriveWarningView([soft, strong, hold], ui2).banner).toBe(hold);
+  });
+
+  it('styles the banner by level: soft yellow, strong and hold red', () => {
+    expect(bannerTone('soft_warning')).toBe('soft');
+    expect(bannerTone('strong_warning')).toBe('strong');
+    expect(bannerTone('hold_transfers')).toBe('strong');
   });
 
   it('tolerates stale dismissed state after warnings reset', () => {
