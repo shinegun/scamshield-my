@@ -118,6 +118,10 @@ function applyServerMessage(state: CallState, message: ServerMessage): CallState
 
     case 'error':
       return { ...state, errors: pushError(state.errors, message.message) };
+
+    // Race panel answers belong to the race panel's own socket, not the call.
+    case 'race.result':
+      return state;
   }
 }
 

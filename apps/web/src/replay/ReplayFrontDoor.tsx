@@ -48,7 +48,7 @@ function ScriptCard({ script, onPlay }: { script: CallScript; onPlay: () => void
     <button
       type="button"
       className="card"
-      aria-label={`Play: ${script.title} (${scam ? 'scam' : 'innocent'})`}
+      aria-label={`Play: ${script.title}`}
       onClick={onPlay}
     >
       <span className="card__top">
