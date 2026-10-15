@@ -187,3 +187,104 @@ export function toColumns(entries: readonly RaceEntry[]): ColumnView[] {
     ];
   });
 }
+
+export interface RaceHeadline {
+  winner?: ScorerName;
+  lead: string;
+  value?: string;
+}
+
+// The big line: who decided first, from measured medians only.
+export function raceHeadline(stats: readonly LatencyStats[] | null): RaceHeadline {
+  const answered = (stats ?? []).filter((s) => s.ok > 0 && Number.isFinite(s.medianMs));
+  const winner = answered.reduce<LatencyStats | undefined>(
+    (best, s) => (!best || s.medianMs < best.medianMs ? s : best),
+    undefined,
+  );
+  if (!winner) return { lead: 'Who decides first?' };
+  return {
+    winner: winner.scorer,
+    lead: `${SCORER_LABELS[winner.scorer]} decides in `,
+    value: formatLatency(winner.medianMs),
+  };
+}
+
+// "Malay scam: asks for money, sent to both scorers 5 times."
+export function raceSubline(presetLabel: string, runsDone: number): string {
+  const times = runsDone === 1 ? 'once' : `${runsDone} times`;
+  return `${presetLabel}, sent to both scorers ${times}.`;
+}
+
+const SCALE_STEPS_MS = [400, 800, 1600, 3200, 6400, 12800];
+
+export function scaleMaxFor(runs: readonly (readonly RaceEntry[])[]): number {
+  const times = runs.flatMap((r) => r.flatMap((e) => (e.ok ? [e.latencyMs] : [])));
+  if (times.length === 0) return 1600;
+  const slowest = Math.max(...times);
+  return SCALE_STEPS_MS.find((s) => s >= slowest) ?? SCALE_STEPS_MS[SCALE_STEPS_MS.length - 1]!;
+}
+
+export interface LaneView {
+  scorer: ScorerName;
+  title: string;
+  medianText: string;
+  rangeText: string;
+  medianPercent: number;
+  dots: number[];
+  verdict?: string;
+  error?: string;
+}
+
+const pct = (ms: number, max: number) => Math.min(100, Math.max(0, (ms / max) * 100));
+
+// "225–253 ms" when both ends share a unit, "802 ms–1.5 s" otherwise.
+function spanText(minMs: number, maxMs: number): string {
+  const lo = formatLatency(minMs);
+  const hi = formatLatency(maxMs);
+  if (lo === hi) return lo;
+  const unit = (t: string) => t.slice(t.lastIndexOf(' ') + 1);
+  return unit(lo) === unit(hi) ? `${lo.slice(0, lo.lastIndexOf(' '))}–${hi}` : `${lo}–${hi}`;
+}
+
+export function laneViews(runs: readonly (readonly RaceEntry[])[]): LaneView[] {
+  const scaleMax = scaleMaxFor(runs);
+  const stats = summarizeRuns(runs);
+  const latest = runs[runs.length - 1];
+  const columns = latest ? toColumns(latest) : [];
+  return SCORERS.map((scorer): LaneView => {
+    const s = stats.find((x) => x.scorer === scorer)!;
+    const col = columns.find((c) => c.scorer === scorer);
+    const dots = runs.flatMap((r) => {
+      const e = r.find((x) => x.scorer === scorer);
+      return e?.ok ? [pct(e.latencyMs, scaleMax)] : [];
+    });
+    const answered = `${s.ok}/${s.runs} answered`;
+    const view: LaneView = {
+      scorer,
+      title: SCORER_LABELS[scorer],
+      medianText: s.ok > 0 ? formatLatency(s.medianMs) : '—',
+      rangeText:
+        s.runs === 0
+          ? ''
+          : s.ok === 0
+            ? answered
+            : s.runs === 1
+              ? answered
+              : `${spanText(s.minMs, s.maxMs)} · ${answered}`,
+      medianPercent: s.ok > 0 ? pct(s.medianMs, scaleMax) : 0,
+      dots,
+    };
+    if (col?.ok) view.verdict = `${col.percent} · ${col.scamTypeText === 'None' ? 'No scam' : col.scamTypeText}`;
+    else if (col) view.error = col.error;
+    return view;
+  });
+}
+
+// Five labels for the axis: 0, a quarter, half, three quarters and the max.
+export function axisTicks(scaleMaxMs: number): string[] {
+  return [0, 0.25, 0.5, 0.75, 1].map((f) => {
+    const ms = scaleMaxMs * f;
+    if (ms === 0) return '0';
+    return scaleMaxMs >= 1600 ? `${(ms / 1000).toFixed(1)} s` : `${Math.round(ms)} ms`;
+  });
+}
