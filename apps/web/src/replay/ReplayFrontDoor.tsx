@@ -1,66 +1,47 @@
 import { Link } from 'react-router-dom';
-import { CALL_SCRIPTS, scriptDurationSec, type CallScript } from '@scamshield/shared';
-import { ACTION_LABELS } from '../call/labels';
+import type { CallScript } from '@scamshield/shared';
+import { CallList } from './CallList';
 import { SpeedToggle } from './SpeedToggle';
 import './replay.css';
 
-// What a first-time visitor sees: three calls, one tap to ring.
+// The front door inside the phone (narrow screens): three calls, one tap to ring.
 export function ReplayFrontDoor({ onPlay }: { onPlay: (script: CallScript) => void }) {
-
   return (
     <main className="door">
-      <header className="door__head">
-        <h1 className="door__title">ScamShield MY</h1>
-        <p className="door__lead">
-          Pick a call and watch ScamShield listen. It warns you as the scam builds, and holds the
-          transfer before money leaves.
-        </p>
-      </header>
+      <h1 className="door__title">ScamShield</h1>
+      <p className="door__lead">Hears the scam. Holds the money.</p>
 
-      <div className="door__speed">
-        <span>Replay speed</span>
+      <div className="door__section">
+        <span>Play a call · about 2 minutes</span>
         <SpeedToggle />
       </div>
+      <CallList onPlay={onPlay} />
 
-      <ul className="door__cards">
-        {CALL_SCRIPTS.map((script) => (
-          <li key={script.id}>
-            <ScriptCard script={script} onPlay={() => onPlay(script)} />
-          </li>
-        ))}
-      </ul>
-
-      <footer className="door__foot">
+      <div className="door__notes">
+        <p>Runs on Gemini, Cloud Run, Firestore and Firebase.</p>
         <p>Call detection is simulated. Scoring, warnings and the transfer hold are real.</p>
-        <Link className="door__dash" to="/dashboard">
-          Fraud dashboard
-        </Link>
-      </footer>
+      </div>
+
+      <ul className="door__links">
+        <li>
+          <Link to="/dashboard">
+            Fraud desk <Chevron />
+          </Link>
+        </li>
+        <li>
+          <Link to="/race">
+            Jev vs Gemini <Chevron />
+          </Link>
+        </li>
+      </ul>
     </main>
   );
 }
 
-function ScriptCard({ script, onPlay }: { script: CallScript; onPlay: () => void }) {
-  const scam = script.expectedAction !== 'none';
+function Chevron() {
   return (
-    <button
-      type="button"
-      className="card"
-      aria-label={`Play: ${script.title}`}
-      onClick={onPlay}
-    >
-      <span className="card__top">
-        <span className={`card__kind card__kind--${scam ? 'scam' : 'safe'}`}>
-          {scam ? 'Scam call' : 'Innocent call'}
-        </span>
-        <span className="card__len">about {Math.max(1, Math.round(scriptDurationSec(script) / 60))} min</span>
-      </span>
-      <span className="card__title">{script.title}</span>
-      <span className="card__summary">{script.summary}</span>
-      <span className="card__bottom">
-        <span className="card__expect">Expected: {ACTION_LABELS[script.expectedAction]}</span>
-        <span className="card__play">▶ Play</span>
-      </span>
-    </button>
+    <svg width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <path d="M1 1l6 6-6 6" />
+    </svg>
   );
 }

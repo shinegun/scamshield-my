@@ -32,6 +32,7 @@
 }
 .desk__link:hover { text-decoration: underline; }
 .desk__link--current { color: var(--light-text-primary); }
+.desk__link--right { margin-left: auto; }
 .desk__meta {
   margin-left: auto;
   color: var(--light-text-secondary);
@@ -58,6 +59,31 @@
    shows the whole phone without scrolling. */
 .desk__phone .phone {
   height: min(780px, calc(100dvh - 52px - 64px));
+}
+
+.desk--idle .desk__nav { background: none; border-bottom: 0; }
+.desk__grid--idle {
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 72px;
+  padding: 40px 96px;
+  align-items: center;
+}
+.desk--idle .desk__phone { align-items: center; }
+.desk--idle .phone {
+  width: 372px;
+  height: min(760px, calc(100dvh - 52px - 80px));
+}
+.desk__quiet {
+  flex: 1;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+@media (max-width: 1300px) {
+  .desk__grid--idle { gap: 40px; padding: 32px 48px; }
 }
 
 /* Below 1100 px (or idle) the desktop wrappers stay in the tree but add no boxes. */
