@@ -7,6 +7,9 @@ import {
   flagsSeen,
   type Action,
   type CallState,
+  type HoldDoc,
+  type RiskEntryDoc,
+  type SessionDoc,
   type ClientMessage,
   type ScamType,
   type ScorerName,
@@ -14,6 +17,7 @@ import {
   type SessionRisk,
   type TransferStatus,
 } from '@scamshield/shared';
+import type { CallStore } from './store/types';
 import type { Scorer } from './scorers/types';
 import { writeWarning, type WarningWriter } from './warnings/writer';
 
@@ -40,6 +44,9 @@ export interface SessionOptions {
   scorer: Scorer;
   // Writes the warning text; without one the fixed fallback strings are used.
   writer?: WarningWriter;
+  // Records the call as it happens. Writes are never waited on and their
+  // errors are only logged. Without one, nothing is stored.
+  store?: CallStore;
   now: () => number;
   send: (message: ServerMessage) => void;
   // Called once when the client sends session.end.
@@ -71,11 +78,17 @@ interface Started {
 export class CallSession {
   private started?: Started;
   private ended = false;
+  private endRecorded = false;
   private skippedSec = 0;
   private lines: Line[] = [];
   private risk: SessionRisk = emptySession();
   private action: Action = 'none';
-  private lastScamType: ScamType = 'none';
+  // Ticks per scam type; the call's type is the most frequent (ties go to the latest).
+  private typeCounts = new Map<ScamType, number>();
+  private latestType: ScamType = 'none';
+  private peakRank = 0;
+  private tickCount = 0;
+  private lastRisk = 0;
   private lastScorer?: ScorerName;
   private bankAppOpen = false;
   private transferScreenOpen = false;
@@ -135,7 +148,7 @@ export class CallSession {
 
   // The socket went away without session.end.
   dispose(): void {
-    this.ended = true;
+    this.markEnded();
   }
 
   private start(message: Extract<ClientMessage, { type: 'session.start' }>): void {
@@ -148,12 +161,67 @@ export class CallSession {
       scriptId: message.scriptId,
     };
     this.opts.send({ type: 'session.started', sessionId: this.started.sessionId });
+    const started = this.started;
+    const now = started.startedAt;
+    this.store(() =>
+      this.opts.store!.createSession(started.sessionId, {
+        sessionId: started.sessionId,
+        status: 'live',
+        startedAtMs: now,
+        updatedAtMs: now,
+        language: started.language,
+        scriptId: started.scriptId,
+        callerKnown: started.callerKnown,
+        callerInternational: started.callerInternational,
+        risk: 0,
+        action: 'none',
+        stage: this.risk.stageReached,
+        scamType: 'none',
+        peakAction: 'none',
+        flagsSeen: [],
+      }),
+    );
   }
 
   private end(): void {
     if (this.ended) return;
-    this.ended = true;
+    this.markEnded();
     this.opts.onEnd?.();
+  }
+
+  // Whatever the reason the call stopped, the session document says so once.
+  private markEnded(): void {
+    this.ended = true;
+    if (this.endRecorded || !this.started) return;
+    this.endRecorded = true;
+    const sessionId = this.started.sessionId;
+    const now = this.opts.now();
+    this.store(() =>
+      this.opts.store!.updateSession(sessionId, { status: 'ended', endedAtMs: now, updatedAtMs: now }),
+    );
+  }
+
+  // Runs a store write without waiting for it; failures are logged, never thrown.
+  private store(write: () => Promise<void>): void {
+    if (!this.opts.store) return;
+    try {
+      write().catch((err) => console.error(`store write failed: ${errorText(err)}`));
+    } catch (err) {
+      console.error(`store write failed: ${errorText(err)}`);
+    }
+  }
+
+  // The call's dominant scam type: the one with the most ticks, ties to the latest.
+  private scamType(): ScamType {
+    let best: ScamType = 'none';
+    let bestCount = 0;
+    for (const [type, count] of this.typeCounts) {
+      if (count > bestCount || (count === bestCount && type === this.latestType)) {
+        best = type;
+        bestCount = count;
+      }
+    }
+    return best;
   }
 
   private enqueue(task: () => Promise<void> | void): Promise<void> {
@@ -193,7 +261,11 @@ export class CallSession {
     if (this.ended) return;
 
     this.risk = absorb(this.risk, result.decision);
-    if (result.decision.scamType !== 'none') this.lastScamType = result.decision.scamType;
+    const type = result.decision.scamType;
+    if (type !== 'none') {
+      this.typeCounts.set(type, (this.typeCounts.get(type) ?? 0) + 1);
+      this.latestType = type;
+    }
     this.lastScorer = result.scorer;
     this.sendRisk(started, result.scorer, result.latencyMs);
   }
@@ -219,14 +291,34 @@ export class CallSession {
           toAccount: message.toAccount,
           status,
         });
+        const atSec = this.atSec(started);
         this.opts.send({
           type: 'transfer',
           transferId,
           status,
           amountRm: message.amountRm,
           toAccount: message.toAccount,
-          atSec: this.atSec(started),
+          atSec,
         });
+        if (status === 'held') {
+          const now = this.opts.now();
+          const hold: HoldDoc = {
+            transferId,
+            status: 'held',
+            amountRm: message.amountRm,
+            toAccount: message.toAccount,
+            heldAtSec: atSec,
+            heldAtMs: now,
+            risk: this.lastRisk,
+            stage: this.risk.stageReached,
+            scamType: this.scamType(),
+            flagsSeen: flagsSeen(this.risk),
+          };
+          this.store(() => this.opts.store!.setHold(started.sessionId, transferId, hold));
+          this.store(() =>
+            this.opts.store!.updateSession(started.sessionId, { holdStatus: 'held', updatedAtMs: now }),
+          );
+        }
         break;
       }
 
@@ -245,6 +337,16 @@ export class CallSession {
           toAccount: transfer.toAccount,
           atSec: this.atSec(started),
         });
+        const now = this.opts.now();
+        this.store(() =>
+          this.opts.store!.updateHold(started.sessionId, message.transferId, {
+            status: 'released',
+            releasedAtMs: now,
+          }),
+        );
+        this.store(() =>
+          this.opts.store!.updateSession(started.sessionId, { holdStatus: 'released', updatedAtMs: now }),
+        );
         break;
       }
 
@@ -260,18 +362,51 @@ export class CallSession {
       callerKnown: started.callerKnown,
     });
     this.action = action;
+    this.lastRisk = risk;
+    const scamType = this.scamType();
     this.opts.send({
       type: 'risk',
       risk,
       action,
       stage: this.risk.stageReached,
-      scamType: this.lastScamType,
+      scamType,
       flags: this.risk.peakFlags,
       scorer,
       latencyMs,
       atSec,
     });
+    this.recordRisk(started, { risk, action, scamType, scorer, latencyMs, atSec });
     this.warnIfRaised(started, action);
+  }
+
+  private recordRisk(
+    started: Started,
+    t: { risk: number; action: Action; scamType: ScamType; scorer: ScorerName; latencyMs: number; atSec: number },
+  ): void {
+    if (!this.opts.store) return;
+    this.peakRank = Math.max(this.peakRank, ACTIONS.indexOf(t.action));
+    const tickId = String(++this.tickCount).padStart(4, '0');
+    const entry: RiskEntryDoc = {
+      atSec: t.atSec,
+      risk: t.risk,
+      action: t.action,
+      stage: this.risk.stageReached,
+      scamType: t.scamType,
+      flags: this.risk.peakFlags,
+      scorer: t.scorer,
+      latencyMs: t.latencyMs,
+    };
+    const fields: Partial<SessionDoc> = {
+      risk: t.risk,
+      action: t.action,
+      stage: this.risk.stageReached,
+      scamType: t.scamType,
+      peakAction: ACTIONS[this.peakRank]!,
+      flagsSeen: flagsSeen(this.risk),
+      updatedAtMs: this.opts.now(),
+    };
+    this.store(() => this.opts.store!.addRisk(started.sessionId, tickId, entry));
+    this.store(() => this.opts.store!.updateSession(started.sessionId, fields));
   }
 
   // Called right after the `risk` message, and never waited on: the warning is
@@ -285,7 +420,7 @@ export class CallSession {
     const pending = writeWarning(this.opts.writer, {
       action,
       language: started.language,
-      scamType: this.lastScamType,
+      scamType: this.scamType(),
       stage: this.risk.stageReached,
       flagsSeen: flagsSeen(this.risk),
     });
