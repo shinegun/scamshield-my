@@ -14,12 +14,12 @@
   height: min(var(--phone-h), calc(100dvh - 72px));
   display: flex;
   flex-direction: column;
-  background: var(--phone-bg);
   color: var(--text-primary);
-  border-radius: 46px;
-  border: 10px solid #05080f;
-  box-shadow: 0 30px 60px rgba(11, 18, 32, 0.35), 0 0 0 2px #2a3550;
-  overflow: hidden;
+  box-sizing: border-box;
+  padding: 12px;
+  background: #1d1d1f;
+  border-radius: 56px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.18);
 }
 
 .phone__screen {
@@ -28,35 +28,11 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-}
-
-.statusbar {
-  position: relative;
-  flex: none;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
-
-.statusbar__notch {
-  position: absolute;
-  left: 50%;
-  top: 8px;
-  width: 92px;
-  height: 22px;
-  transform: translateX(-50%);
-  border-radius: 12px;
-  background: #05080f;
-}
-
-.statusbar__icons {
-  font-size: 11px;
-  color: var(--text-secondary);
+  box-sizing: border-box;
+  padding-top: 44px;
+  background: var(--phone-bg);
+  border-radius: 46px;
+  overflow: hidden;
 }
 
 .stage__link {
@@ -78,18 +54,14 @@
   .phone {
     width: 100%;
     height: 100dvh;
-    border: 0;
+    padding: 0;
     border-radius: 0;
     box-shadow: none;
   }
 
-  .statusbar {
-    height: calc(30px + var(--safe-top));
-    padding-top: var(--safe-top);
-  }
-
-  .statusbar__notch {
-    display: none;
+  .phone__screen {
+    border-radius: 0;
+    padding-top: calc(var(--safe-top) + 12px);
   }
 
   /* The link would sit under the phone; the front door repeats it inside. */
