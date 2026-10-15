@@ -7,3 +7,6 @@ dist
 
 # Firebase CLI
 firebase-debug.log
+
+# Firebase CLI deploy cache
+.firebase/
