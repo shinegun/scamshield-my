@@ -15,6 +15,39 @@ function make(fetchImpl: unknown) {
 }
 
 describe('TtsWarningSpeech', () => {
+  it('warm() records only the clips that are missing, once', async () => {
+    let calls = 0;
+    let fail = true;
+    const { speech } = make(async () => {
+      calls++;
+      return fail ? new Response('', { status: 500 }) : ok('QUJD');
+    });
+    await speech.ready;
+    expect(calls).toBe(4);
+    expect(speech.audioFor('strong_warning', 'ms')).toBeUndefined();
+    fail = false;
+    const first = speech.warm();
+    const second = speech.warm(); // already recording: starts nothing new
+    await Promise.all([first, second]);
+    expect(calls).toBe(8);
+    expect(speech.audioFor('strong_warning', 'ms')).toBe('data:audio/mpeg;base64,QUJD');
+    await speech.warm(); // all recorded: nothing to do
+    expect(calls).toBe(8);
+  });
+
+  it('gives up on an access token that never comes', async () => {
+    const logs: string[] = [];
+    const speech = new TtsWarningSpeech({
+      fetch: (async () => ok('QUJD')) as unknown as typeof fetch,
+      getToken: () => new Promise<string>(() => {}),
+      timeoutMs: 20,
+      log: (l) => logs.push(l),
+    });
+    await speech.ready;
+    expect(logs).toHaveLength(4);
+    expect(logs[0]).toMatch(/failed \(access token timed out/);
+  });
+
   it('has no audio before the clips are ready', () => {
     const { speech } = make(() => new Promise<Response>(() => {}));
     expect(speech.audioFor('strong_warning', 'ms-MY')).toBeUndefined();
