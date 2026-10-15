@@ -1,217 +1,282 @@
 .bank-bar {
   flex: none;
   padding: 10px 16px calc(14px + var(--safe-bottom));
-  border-top: 1px solid var(--separator);
-  background: var(--surface-grouped);
 }
 
 .bank-bar__open {
   width: 100%;
-  min-height: 48px;
+  height: 50px;
   border: 0;
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--action-blue);
   color: #fff;
+  font-size: 17px;
   font-weight: 600;
 }
 
 .bank-bar__open:disabled {
-  background: var(--surface-raised);
-  color: var(--text-secondary);
+  opacity: 0.4;
 }
 
-/* Bank app overlay (#11): covers the call screen. */
+/* Bank app overlay (#11): covers the call screen. Light iOS grouped style. */
 .bank {
+  --bank-grey: #6e6e73; /* mockup #8A8A8E is 3.3:1 on white; this passes 4.5:1 */
+  --bank-section: #6d6d72;
+  --bank-body: #3c3c43;
   position: absolute;
   inset: 0;
   z-index: 10;
   display: flex;
   flex-direction: column;
-  background: var(--phone-bg);
-}
-
-.bank__head {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 16px 10px;
-  border-bottom: 1px solid var(--separator);
-}
-
-.bank__title {
-  margin: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: max(60px, calc(var(--safe-top) + 16px)) 16px max(34px, calc(var(--safe-bottom) + 16px));
+  background: var(--light-sidebar-bg);
+  color: var(--light-bank-text);
   font-size: 17px;
 }
 
+.bank__nav {
+  flex: none;
+  align-self: flex-start;
+  min-height: 44px;
+  min-width: 44px;
+  margin: -6px 0 -6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--light-action-blue);
+  font: inherit;
+  text-align: left;
+}
+
+.bank__nav:disabled {
+  color: var(--bank-grey);
+}
+
+.bank__title {
+  flex: none;
+  margin: 6px 0 0;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
 .bank__body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px 16px calc(16px + var(--safe-bottom));
 }
 
-.bank__card {
-  padding: 16px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #2b4a8f, #1b2740);
-}
-
-.bank__card-label {
+.bank__section {
+  margin: 22px 16px 6px;
   font-size: 13px;
-  color: var(--text-secondary);
+  text-transform: uppercase;
+  color: var(--bank-section);
 }
 
-.bank__card-balance {
-  margin-top: 4px;
-  font-size: 28px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+.bank__group {
+  border-radius: 12px;
+  background: var(--light-surface-grouped);
+  overflow: hidden;
 }
 
-.bank__card-sub {
-  margin-top: 2px;
-  font-size: 12px;
-  color: var(--text-secondary);
+.bank__row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 16px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
 }
 
-.bank__h {
-  margin: 0;
-  font-size: 18px;
+.bank__row + .bank__row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 0;
+  height: 1px;
+  background: var(--light-bank-separator);
+  opacity: 0.6;
 }
 
-.bank__h--hold {
-  color: var(--risk-hold);
+.bank__row--button {
+  color: var(--light-action-blue);
+}
+
+.bank__row-label {
+  flex: none;
+}
+
+/* A row that is only a label (the noticed list) wraps instead of overflowing. */
+.bank__row-label:only-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.bank__row-value {
+  min-width: 0;
+  color: var(--bank-grey);
+  text-align: right;
+}
+
+.bank__row-value--alert {
+  color: var(--light-risk-strong-text);
+}
+
+.bank__input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  margin: -11px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--light-bank-text);
+  font: inherit;
+  text-align: right;
+}
+
+.bank__input::placeholder {
+  color: var(--bank-grey);
+}
+
+.bank__input:focus-visible,
+.bank__row--button:focus-visible {
+  outline: 2px solid var(--light-action-blue);
+  outline-offset: 2px;
 }
 
 .bank__text {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.45;
-}
-
-.bank__text--tight {
-  margin-bottom: -4px;
-  color: var(--text-secondary);
+  margin: 16px 0 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--bank-body);
 }
 
 .bank__note {
-  margin: 0;
+  margin: 8px 16px 0;
   font-size: 13px;
   line-height: 1.4;
-  color: var(--text-secondary);
+  color: var(--bank-section);
 }
 
-.bank__reasons {
-  margin: 0;
-  padding-left: 20px;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.bank__banner {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: rgba(236, 59, 75, 0.16);
-  border: 1px solid var(--risk-hold);
+.bank__alert {
+  margin: 16px 16px 0;
   font-size: 13px;
-}
-
-.bank__error {
-  margin: 0;
-  font-size: 13px;
-  color: #ff8f99;
+  line-height: 1.4;
+  color: var(--light-risk-strong-text);
 }
 
 .bank__form {
   display: flex;
+  flex: 1 0 auto;
   flex-direction: column;
-  gap: 8px;
 }
 
-.bank__label {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.bank__input {
-  min-height: 46px;
-  padding: 0 12px;
-  border: 1px solid var(--separator);
+.bank__hero {
+  margin-top: 22px;
+  padding: 26px 16px;
   border-radius: 12px;
-  background: var(--surface-grouped);
-  color: var(--text-primary);
-  font: inherit;
+  background: var(--light-surface-grouped);
+  text-align: center;
 }
 
-.bank__input:focus-visible {
-  outline: 2px solid var(--action-blue);
-  outline-offset: 1px;
+.bank__hero-label {
+  font-size: 15px;
+  color: var(--bank-grey);
 }
 
-.bank__quick {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.bank__hero-amount {
+  margin-top: 4px;
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.bank__hero-text {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--bank-body);
 }
 
 .bank__actions {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 8px;
+  margin-top: auto;
+  padding-top: 22px;
+}
+
+.bank__btn,
+.bank__destructive,
+.bank__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-decoration: none;
 }
 
 .bank__btn {
-  min-height: 48px;
-  border: 1px solid transparent;
-  border-radius: 14px;
+  min-height: 50px;
+  border-radius: 12px;
+  background: var(--light-action-blue);
+  color: #fff;
   font-weight: 600;
 }
 
-.bank__btn--primary {
-  background: var(--action-blue);
-  color: #fff;
-}
-
-.bank__btn--ghost {
-  background: transparent;
-  border-color: var(--separator);
-  color: var(--text-secondary);
-}
-
 .bank__btn:disabled {
-  background: var(--surface-raised);
-  color: var(--text-secondary);
+  opacity: 0.4;
 }
 
-.bank__block,
-.bank__tick {
-  align-self: center;
-  width: 56px;
-  height: 56px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  font-size: 28px;
-  font-weight: 800;
-  color: #fff;
+.bank__destructive {
+  min-height: 50px;
+  color: var(--light-risk-strong-text);
 }
 
-.bank__block {
-  background: var(--risk-hold);
+.bank__link {
+  min-height: 44px;
+  color: var(--light-action-blue);
 }
 
-.bank__tick {
-  background: var(--risk-safe);
+.bank__link--small {
+  font-size: 15px;
+}
+
+.bank__btn:focus-visible,
+.bank__destructive:focus-visible,
+.bank__link:focus-visible,
+.bank__nav:focus-visible {
+  outline: 2px solid var(--light-action-blue);
+  outline-offset: 2px;
+}
+
+.bank__count-card {
+  margin-top: 22px;
+  padding: 22px 16px;
+  border-radius: 12px;
+  background: var(--light-surface-grouped);
+  text-align: center;
 }
 
 .bank__count {
-  align-self: center;
   font-size: 64px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -219,13 +284,13 @@
 
 .bank__count-unit {
   font-size: 24px;
-  color: var(--text-secondary);
+  color: var(--bank-grey);
 }
 
 .bank__progress {
   width: 100%;
   height: 8px;
-  accent-color: var(--action-blue);
+  accent-color: var(--light-action-blue);
 }
 
 .bank__status {
@@ -240,8 +305,8 @@
 .bank__spinner {
   width: 36px;
   height: 36px;
-  border: 4px solid var(--separator);
-  border-top-color: var(--action-blue);
+  border: 4px solid var(--light-bank-separator);
+  border-top-color: var(--light-action-blue);
   border-radius: 50%;
   animation: bank-spin 0.9s linear infinite;
 }

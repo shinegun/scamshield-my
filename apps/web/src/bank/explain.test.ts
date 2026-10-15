@@ -38,4 +38,20 @@ describe('flag phrases', () => {
     expect(holdStrings('ms').body('RM500.00', 'Ali', 'RM1,000.00')).toContain('RM500.00');
     expect(holdStrings().title).toBe('Transfer held to protect you');
   });
+
+  it('writes the held-screen sentence with and without a scam label', () => {
+    expect(holdStrings().because('Fake police')).toBe(
+      "You were on a call that looked like a fake police scam when this transfer was made, so we didn't send it.",
+    );
+    expect(holdStrings().because()).toBe(
+      "You were on a call that looked like a scam when this transfer was made, so we didn't send it.",
+    );
+    expect(holdStrings('ms').because('Polis palsu')).toBe(
+      'Anda sedang membuat panggilan yang kelihatan seperti penipuan polis palsu semasa pindahan ini dibuat, jadi kami tidak menghantarnya.',
+    );
+    expect(holdStrings('ms').because()).toContain('penipuan semasa');
+    expect(holdStrings('ms').heldTitle).toBe('Pindahan ditahan');
+    expect(holdStrings().stillIn).toBe('Still in your Savings');
+    expect(holdStrings('ms').stillIn).toBe('Masih dalam akaun Simpanan anda');
+  });
 });

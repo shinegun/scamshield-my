@@ -108,7 +108,7 @@ describe('warningStrings', () => {
   it('uses Malay for ms languages', () => {
     const hold = warningStrings('hold_transfers', 'ms-MY');
     expect(hold.header).toBe('Pemindahan wang ditahan sementara');
-    expect(hold.dismiss).toBe('Saya faham');
+    expect(hold.dismiss).toBe('Teruskan panggilan');
     expect(hold.pill).toBe('Amaran penipuan');
     expect(warningStrings('strong_warning', 'ms').header).toBe('Amaran: kemungkinan penipuan');
   });
@@ -116,7 +116,7 @@ describe('warningStrings', () => {
   it('uses English otherwise', () => {
     const hold = warningStrings('hold_transfers', 'en-MY');
     expect(hold.header).toBe('Transfers paused');
-    expect(hold.dismiss).toBe('I understand');
+    expect(hold.dismiss).toBe('Continue call');
     expect(warningStrings('strong_warning', 'en').header).toBe('Warning: this looks like a scam');
   });
 
