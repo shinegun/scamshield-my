@@ -1,0 +1,161 @@
+/* Call summary (docs/design/native/summary.dc.html). */
+.summary {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 16px calc(34px + var(--safe-bottom));
+  background: var(--phone-bg);
+  color: var(--text-primary);
+}
+
+.summary__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.summary__title {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.summary__sub {
+  margin: 2px 0 0;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.summary__stats {
+  margin: 18px 0 0;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  text-align: center;
+  border-radius: 12px;
+  background: var(--surface-grouped);
+}
+
+.summary__stats > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary__stats dd {
+  order: 0;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary__stats dt {
+  order: 1;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.summary__section {
+  margin: 22px 16px 6px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.summary__group {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: 12px;
+  background: var(--surface-grouped);
+}
+
+.summary__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 8px;
+  padding: 11px 16px;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.summary__row + .summary__row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 72px;
+  right: 0;
+  height: 1px;
+  background: var(--separator);
+}
+
+.summary__time {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.summary__calm {
+  padding: 14px 16px;
+}
+
+.summary__calm-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--risk-safe);
+}
+
+.summary__calm-text {
+  margin: 4px 0 0;
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+
+/* Colour comes from an Action, or green for money kept (ADR 6). */
+.summary [data-tone='soft'] {
+  color: var(--risk-soft);
+}
+.summary [data-tone='strong'] {
+  color: var(--risk-strong);
+}
+.summary [data-tone='safe'] {
+  color: var(--risk-safe);
+}
+
+.summary__actions {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+}
+
+.summary__primary,
+.summary__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 12px;
+  font-size: 17px;
+  text-decoration: none;
+}
+
+.summary__primary {
+  height: 50px;
+  background: var(--action-blue);
+  color: #fff;
+  font-weight: 600;
+}
+
+.summary__link {
+  height: 44px;
+  background: transparent;
+  color: var(--action-blue);
+}
