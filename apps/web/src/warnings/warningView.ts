@@ -105,3 +105,24 @@ export function dismissBanner(ui: WarningUiState, warnings: WarningMessage[]): W
   const latest = warnings[warnings.length - 1];
   return { ...ui, bannerDismissedLevel: latest ? LEVEL[latest.action] : ui.bannerDismissedLevel };
 }
+
+export interface NativeStrings {
+  cardTitle: string;
+  endCall: string;
+  why: string;
+  speaking: string;
+  noSignals: string;
+}
+
+// Labels for the native notification card and critical alert.
+export function nativeStrings(action: WarningMessage['action'], language: string): NativeStrings {
+  const ms = isMalay(language);
+  const soft = action === 'soft_warning';
+  return {
+    cardTitle: soft ? (ms ? 'Mungkin penipuan' : 'Possible scam') : ms ? 'Kemungkinan besar penipuan' : 'Likely scam',
+    endCall: ms ? 'Tamatkan Panggilan' : 'End Call',
+    why: ms ? 'Kenapa saya nampak ini?' : 'Why am I seeing this?',
+    speaking: ms ? 'Sedang dibacakan' : 'Reading this aloud',
+    noSignals: ms ? 'Tiada isyarat direkodkan lagi' : 'No signals recorded yet',
+  };
+}

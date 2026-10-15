@@ -1,5 +1,5 @@
-/* Soft banner and the reopen pill, in the call screen's flow between the
-   toolbar and the risk card, so they never cover the call controls. */
+/* Native (iOS) warning UI: a notification card and reopen pill in the call
+   screen's flow, and a critical alert dimming the whole phone screen. */
 .warn-top {
   flex: none;
   display: flex;
@@ -12,207 +12,248 @@
 .warn-top:has(> :not(:empty)) {
   padding-bottom: 8px;
 }
-
 .warn-top > * {
   pointer-events: none;
 }
 .warn-top button,
-.warn-banner {
+.warn-card {
   pointer-events: auto;
 }
 
-.warn-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 8px 10px 12px;
-  border-radius: 14px;
-  background: var(--risk-soft);
-  color: #2b1d00;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-  animation: warn-slide-in 0.35s ease-out;
-}
-
-.warn-banner[data-tone='strong'] {
-  background: var(--risk-hold);
-  color: #fff;
-}
-
-.warn-banner__icon {
-  flex: none;
-  width: 22px;
-  height: 22px;
+.warn-card {
+  position: relative;
+  padding: 12px 14px;
+  border-radius: 22px;
+  background: var(--surface-grouped);
   display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #2b1d00;
-  color: var(--risk-soft);
-  font-size: 14px;
-  font-weight: 800;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 12px;
+  text-align: left;
 }
-
-.warn-banner[data-tone='strong'] .warn-banner__icon {
+.warn-card__tile {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
   background: #fff;
-  color: var(--risk-hold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-.warn-banner[data-tone='strong'] .warn-banner__close {
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
-}
-
-.warn-banner__text {
-  flex: 1;
-  min-width: 0;
-  margin: 0;
+.warn-card__head {
+  display: flex;
+  justify-content: space-between;
+  padding-right: 32px;
   font-size: 13px;
-  font-weight: 600;
-  line-height: 1.4;
+  color: var(--text-secondary);
 }
-
-.warn-banner__close {
-  flex: none;
-  width: 28px;
-  height: 28px;
+.warn-card__title {
+  margin-top: 2px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.warn-card__text {
+  margin-top: 2px;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.warn-card__close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44px;
+  height: 44px;
   border: 0;
-  border-radius: 50%;
-  background: rgba(43, 29, 0, 0.12);
-  color: #2b1d00;
-  font-size: 18px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 22px;
   line-height: 1;
 }
 
 .warn-pill {
   align-self: center;
-  min-height: 30px;
-  padding: 4px 14px;
+  min-height: 44px;
+  padding: 0 16px;
   border: 0;
   border-radius: 999px;
-  background: var(--risk-hold);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  background: var(--surface-grouped);
+  color: var(--risk-strong);
+  font-size: 13px;
+  font-weight: 600;
 }
 
-@keyframes warn-slide-in {
-  from {
-    transform: translateY(-120%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-/* Full-screen warning, covering the call screen inside the phone frame. */
 .warn-overlay {
   position: absolute;
   inset: 0;
   z-index: 30;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 28px 22px 24px;
-  background: #c92c3b;
-  color: #fff;
-  animation: warn-fade-in 0.25s ease-out;
+  background: rgba(0, 0, 0, 0.78);
+  overflow: hidden;
 }
-
-.warn-overlay[data-action='hold_transfers'] {
-  background: #7a0f1d;
-}
-
-.warn-overlay__body {
-  flex: 1;
-  min-height: 0;
+.warn-alert {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: min(180px, 8%);
+  max-height: calc(100% - 32px);
   overflow-y: auto;
+  box-sizing: border-box;
+  padding: 28px 22px 18px;
+  border-radius: 30px;
+  background: var(--surface-grouped);
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  gap: 14px;
   text-align: center;
+  gap: 10px;
 }
-
-.warn-overlay__icon {
+@media (min-height: 800px) {
+  .warn-alert {
+    top: 180px;
+    max-height: calc(100% - 196px);
+  }
+}
+.warn-alert__icon {
+  flex: none;
   width: 64px;
   height: 64px;
-  display: grid;
-  place-items: center;
   border-radius: 50%;
-  background: #fff;
-  color: #c92c3b;
-  font-size: 40px;
-  font-weight: 800;
+  background: rgba(255, 69, 58, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-.warn-overlay[data-action='hold_transfers'] .warn-overlay__icon {
-  color: #7a0f1d;
-}
-
-.warn-overlay__title {
-  margin: 0;
+.warn-alert__title {
+  margin: 6px 0 0;
   font-size: 22px;
-  line-height: 1.25;
+  font-weight: 700;
+  line-height: 1.2;
 }
-
-.warn-overlay__text {
+.warn-alert__text {
   margin: 0;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.4;
+  color: rgba(235, 235, 245, 0.7);
 }
-
-.warn-overlay__secondary {
-  margin: 4px 0 0;
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.25);
-  font-size: 14px;
-  font-weight: 700;
+.warn-alert__audio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 4px;
 }
-
-.warn-overlay__dismiss {
-  flex: none;
-  min-height: 48px;
-  border: 0;
-  border-radius: 14px;
-  background: #fff;
-  color: #7a0f1d;
-  font-size: 16px;
-  font-weight: 800;
+.warn-alert__speaking {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 20px;
+  font-size: 13px;
+  color: var(--risk-strong);
 }
-
-.warn-mute {
-  flex: none;
-  align-self: center;
-  min-height: 32px;
-  padding: 4px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.35);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
+.warn-alert__bars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
 }
-.warn-mute[aria-pressed='true'] {
-  background: #fff;
-  color: #7a0f1d;
+.warn-alert__bars i {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--risk-strong);
 }
-
-@keyframes warn-fade-in {
+@media (prefers-reduced-motion: no-preference) {
+  .warn-alert__bars i {
+    animation: warn-bar 0.9s ease-in-out infinite alternate;
+  }
+}
+@keyframes warn-bar {
   from {
-    opacity: 0;
+    transform: scaleY(0.6);
   }
   to {
-    opacity: 1;
+    transform: scaleY(1);
   }
 }
+.warn-mute {
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--action-blue);
+  font-size: 13px;
+}
+.warn-alert__buttons {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+.warn-alert__buttons button {
+  border: 0;
+  border-radius: 14px;
+  font-size: 17px;
+}
+.warn-alert__end {
+  height: 52px;
+  background: var(--end-call-fill);
+  color: #fff;
+  font-weight: 600;
+}
+.warn-alert__end:disabled {
+  opacity: 0.4;
+}
+.warn-alert__dismiss {
+  height: 48px;
+  background: var(--fill-control);
+  color: #fff;
+}
+.warn-alert__why {
+  height: 48px;
+  background: transparent;
+  color: var(--action-blue);
+}
+.warn-alert__signals {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+.warn-alert__signals li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  font-size: 15px;
+  line-height: 1.3;
+}
+.warn-alert__signals li + li {
+  border-top: 0.5px solid var(--separator);
+  margin-left: 18px;
+  padding-left: 0;
+}
+.warn-alert__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: -18px;
+}
+.warn-alert__signals li + li .warn-alert__dot {
+  margin-left: 0;
+}
+.warn-alert__empty {
+  color: var(--text-secondary);
+}
 
-@media (prefers-reduced-motion: reduce) {
-  .warn-banner,
-  .warn-overlay {
-    animation: none;
+/* Short windows (same cut-off as the call controls in call.css): keep the
+   card to three lines so the captions stay readable. Screen readers still
+   get the whole text, and the critical alert shows it in full. */
+@media (max-height: 915px) {
+  .warn-card__text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
   }
 }
