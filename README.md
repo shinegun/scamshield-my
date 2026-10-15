@@ -1,6 +1,41 @@
 # ScamShield MY
 
-Warns Malaysians during a scam call, in the language they speak, and holds the bank transfer before the money leaves. Built for the Google AI hackathon by Aqil and Ilham.
+ScamShield listens to a phone call, warns you in your own language as the signs of a scam build up, and holds your bank transfer before the money leaves. It is built for Malaysia's most common phone scams, where a fake MCMC officer hands the victim to a fake police inspector who asks for their savings to be moved to a "safe account". Built by Aqil and Ilham for the AI Builder Cup 2026 (BFSI track).
+
+> Google tells you it might be a scam. We stop the money leaving.
+
+## Try it
+
+**https://scamshield-my-511604.web.app** works in any browser, on a phone or a laptop. It takes about two minutes:
+
+1. Pick a scripted call: the Malay scam, the same scam in Manglish, or an innocent call from a bank. Use 2x to go faster.
+2. Watch the risk bar and the scam stage move as the caller talks. A banner warns early; a full-screen warning (spoken aloud) follows when the call turns dangerous.
+3. Press **Open bank app** and try to send money to the "safe account". The transfer is held, and the app explains why in plain words.
+4. Open the **Fraud dashboard** (link at the bottom) in a second tab or window. The bank's fraud team sees the same call live: risk over time, the red flags raised, and the held transfer.
+5. On the dashboard, **Jev vs Gemini** sends the same piece of a call to both scorers and compares their answers and response times.
+
+The innocent call should stay quiet all the way through. That is the other half of the job.
+
+**What is simulated:** the incoming call and the bank. Calls play from scripts (ADR 5) so anyone can try them without a phone line; the pipeline scores them exactly as it would a live transcript.
+
+## How it uses Google Cloud
+
+| Required | How ScamShield uses it |
+| --- | --- |
+| **Gemini** | Gemini 2.5 Flash on Vertex AI (Singapore) answers the 13 red-flag questions about each part of the call when the primary scorer is slow, and writes every warning in the caller's language (Malay or English). Gemini 2.5 Flash TTS, through Cloud Text-to-Speech, speaks the strong warning aloud. The service account calls Vertex AI; there is no API key. |
+| **Cloud Run** | The pipeline: a WebSocket server that receives the call, scores it line by line, decides the action and answers the bank app's transfer requests. One always-on instance in `asia-southeast1` keeps each call's state in memory. Calls are capped at 5 at once and 5 minutes each. |
+| **Firestore** | Every call is written as it happens: a session document, a risk entry per scoring tick and a record of each held transfer. The fraud dashboard reads them with realtime listeners. Security rules let anyone read this demo data and refuse every write from a browser; no transcript text, names or numbers are stored. |
+| **Firebase** | Firebase Hosting serves the web app (bank app, dashboard and race panel); the dashboard uses the Firebase JS SDK, configured from Hosting at runtime. |
+
+The primary scorer is Jev from TypeSafe, which answers the same 13 questions in about 230 ms; Gemini takes over if Jev doesn't answer within 800 ms (ADR 2). Everything else runs on Google Cloud (ADR 8).
+
+## How it decides
+
+- **The model never picks the action** (ADR 6). Scorers only answer yes/no-style questions ("did the caller tell you not to hang up?") and name the scam stage and type. Code in `packages/shared/src/risk.ts` combines the answers into a risk score and turns that into an action: none, soft warning, strong warning, or hold transfers. The same code runs in the pipeline and the web app.
+- **A call's memory only goes up** (ADR 6). A red flag keeps its highest score and the stage never goes backwards, so a calm minute late in a scam call can't reset it.
+- **Weights and thresholds are hand-tuned** against scripted calls modelled on reported Malaysian cases (drafted with ILMU, a Malaysian language model), and checked against an innocent bank call that must stay silent. `pnpm health` replays both against the live pipeline.
+
+## Team notes
 
 - **The pitch:** Google tells you it might be a scam. We stop the money leaving.
 - **The bar:** "Build a working prototype on Google Cloud and submit it for evaluation."
@@ -184,5 +219,5 @@ How we use them:
 
 ## Blocked on
 
-- **Gemini check on Ilham's machine** (Ilham): the project `scamshield-my-511604` is set up (billing, the nine APIs, Firestore `(default)` in `asia-southeast1`, Firebase, Ilham as Owner) and the Gemini check answers on Aqil's machine. Issue 1 is done when it also answers on Ilham's.
-- **Old project to ignore or delete** (Ilham): `psyched-cab-511515-q0` ("Google AI Builder Cup") was set up on 14 October with Firestore and four APIs but never got billing. Nothing depends on it.
+- **Public repo** (Aqil): the repository is private and only its owner can make it public, which the submission needs. Ilham has push but not admin.
+- **Old project to ignore or delete** (Ilham): `psyched-cab-511515-q0` ("Google AI Builder Cup") was set up on 14 October with Firestore and four APIs but never got billing. Nothing depends on it. It is still the default `gcloud` project on Ilham's machine, so pass `--project scamshield-my-511604`.
