@@ -1,6 +1,6 @@
 import { RED_FLAG_KEYS, type Action, type FlagScores, type ScamStage } from '@scamshield/shared';
 import { describe, expect, it } from 'vitest';
-import { shortRm, summarize } from './summary';
+import { shortRm, summarize, summaryStrings } from './summary';
 import type { CallState, RiskMessage, TransferMessage, WarningMessage } from './state';
 
 const noFlags = Object.fromEntries(RED_FLAG_KEYS.map((k) => [k, 0])) as FlagScores;
@@ -77,6 +77,28 @@ describe('summarize', () => {
   it('times a warning by the first tick that reached its action', () => {
     const s = summarize(call([tick(3, 0.2, 'none'), tick(9, 0.7, 'strong_warning')], [warn('strong_warning')]));
     expect(s.firstWarning.value).toBe('00:09');
+  });
+});
+
+describe('summarize in Malay', () => {
+  it('writes the calm summary and the event lines in Malay', () => {
+    const calm = summarize(call([tick(40, 0.1, 'none')]), 'ms');
+    expect(calm.subtitle).toBe('00:40 · tiada tanda penipuan');
+    expect(calm.kept).toEqual({ value: 'Tiada', label: 'ditahan', tone: 'plain' });
+    expect(summaryStrings('ms').calmTitle).toBe('Tiada tanda penipuan dalam panggilan ini');
+
+    const scam = summarize(
+      call([tick(8, 0.6, 'soft_warning', 'authority_setup')], [warn('soft_warning')], [transfer('held', 5000, 20)]),
+      'ms',
+    );
+    expect(scam.events.map((e) => e.text)).toEqual([
+      'Pemanggil mengaku sebagai pegawai',
+      'Notis kemungkinan penipuan dipaparkan',
+      'Pindahan RM 5,000.00 ditahan',
+    ]);
+    expect(scam.kept.label).toBe('selamat');
+    expect(scam.firstWarning.label).toBe('amaran pertama');
+    expect(scam.subtitle).toBe('00:20 · mungkin polis palsu');
   });
 });
 

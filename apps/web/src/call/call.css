@@ -72,20 +72,6 @@
   text-overflow: ellipsis;
 }
 
-/* Kept: the bank app uses .chip too. */
-.chip {
-  min-height: 32px;
-  padding: 4px 12px;
-  border: 1px solid var(--separator);
-  border-radius: 999px;
-  background: var(--surface-grouped);
-  font-size: 13px;
-}
-
-.chip:hover {
-  border-color: var(--action-blue);
-}
-
 /* Risk status line */
 
 .risk-line {
