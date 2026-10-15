@@ -211,3 +211,11 @@
     height: 56px;
   }
 }
+
+.call__finished {
+  flex: none;
+  margin: 8px 0 0;
+  font-size: 13px;
+  text-align: center;
+  color: var(--text-secondary);
+}

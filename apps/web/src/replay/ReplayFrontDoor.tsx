@@ -1,13 +1,11 @@
 import { Link } from 'react-router-dom';
 import { CALL_SCRIPTS, scriptDurationSec, type CallScript } from '@scamshield/shared';
-import { useCall } from '../call/CallProvider';
 import { ACTION_LABELS } from '../call/labels';
 import { SpeedToggle } from './SpeedToggle';
 import './replay.css';
 
-// What a first-time visitor sees: three calls, one tap to start.
-export function ReplayFrontDoor() {
-  const { start } = useCall();
+// What a first-time visitor sees: three calls, one tap to ring.
+export function ReplayFrontDoor({ onPlay }: { onPlay: (script: CallScript) => void }) {
 
   return (
     <main className="door">
@@ -27,7 +25,7 @@ export function ReplayFrontDoor() {
       <ul className="door__cards">
         {CALL_SCRIPTS.map((script) => (
           <li key={script.id}>
-            <ScriptCard script={script} onPlay={() => start(script)} />
+            <ScriptCard script={script} onPlay={() => onPlay(script)} />
           </li>
         ))}
       </ul>

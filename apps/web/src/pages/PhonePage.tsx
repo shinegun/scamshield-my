@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import type { CallScript } from '@scamshield/shared';
 import { useCall } from '../call/CallProvider';
 import { CallScreen } from '../call/CallScreen';
 import { CallSummary } from '../call/CallSummary';
+import { IncomingCall } from '../call/IncomingCall';
 import { InspectorPanel } from '../call/InspectorPanel';
 import { PhoneFrame } from '../phone/PhoneFrame';
 import { ReplayFrontDoor } from '../replay/ReplayFrontDoor';
@@ -11,7 +14,9 @@ import './desktop.css';
 // The phone: the replay front door until a call starts, then the call. On a
 // wide screen a call also shows the "What ScamShield hears" panel.
 export function PhonePage() {
-  const { status, script, speed } = useCall();
+  const { status, script, speed, start } = useCall();
+  // A picked script rings first; Accept starts the replay exactly as Play did.
+  const [ringing, setRinging] = useState<CallScript | null>(null);
   const wide = useMediaQuery('(min-width: 1100px)');
   const desk = wide && status !== 'idle';
   // One tree for both layouts: only the wrappers change, so resizing across
@@ -40,7 +45,24 @@ export function PhonePage() {
       <div className={desk ? 'desk__grid' : 'desk-off'}>
         <div className={desk ? 'desk__phone' : 'desk-off'}>
           <PhoneFrame>
-            {status === 'idle' ? <ReplayFrontDoor /> : status === 'ended' ? <CallSummary /> : <CallScreen />}
+            {status === 'idle' ? (
+              ringing ? (
+                <IncomingCall
+                  script={ringing}
+                  onDecline={() => setRinging(null)}
+                  onAccept={() => {
+                    setRinging(null);
+                    start(ringing);
+                  }}
+                />
+              ) : (
+                <ReplayFrontDoor onPlay={setRinging} />
+              )
+            ) : status === 'ended' ? (
+              <CallSummary />
+            ) : (
+              <CallScreen />
+            )}
           </PhoneFrame>
         </div>
         {desk && <InspectorPanel />}

@@ -3,7 +3,7 @@ import { SpeedToggle } from '../replay/SpeedToggle';
 import { WarningLayer } from '../warnings/WarningLayer';
 import { useCall } from './CallProvider';
 import { callerIdOf } from './callerId';
-import { formatClock } from './labels';
+import { formatClock, langOf } from './labels';
 import { RiskMeter } from './RiskMeter';
 import { TranscriptView } from './TranscriptView';
 import './call.css';
@@ -17,6 +17,9 @@ export function CallScreen() {
   const open = status === 'connecting' || status === 'live';
 
   const callerId = callerIdOf(script);
+  // The script's last line has played; the call stays open (the judge may
+  // still be in the bank app) until End shows the summary.
+  const finished = status === 'live' && !call.playing && transcript.length > 0;
 
   return (
     <div className="call">
@@ -49,6 +52,14 @@ export function CallScreen() {
       {lastError && (
         <p className="call__error" role="status" title={errors.join('\n')}>
           {lastError}
+        </p>
+      )}
+
+      {finished && (
+        <p className="call__finished" role="status" lang={script?.language}>
+          {langOf(script?.language) === 'ms'
+            ? 'Panggilan tamat: tekan tamat untuk lihat ringkasan'
+            : 'Call finished: tap end to see the summary'}
         </p>
       )}
 
