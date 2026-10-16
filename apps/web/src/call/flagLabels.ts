@@ -5,7 +5,7 @@ import type { Lang } from './labels';
 // them and in the "Heard" lists. The one place this wording lives.
 const FLAG_LABELS: Record<RedFlag, string> = {
   call_transferred_between_agencies: 'Call was handed over',
-  claims_authority: 'Claims to be police or an official',
+  claims_authority: 'Claims to be an official',
   victim_framing: "Says you're a victim",
   mentions_family_involvement: 'Brings in your family',
   threatens_arrest_or_freeze: 'Threatens arrest or a frozen account',
@@ -21,7 +21,7 @@ const FLAG_LABELS: Record<RedFlag, string> = {
 
 const FLAG_LABELS_MS: Record<RedFlag, string> = {
   call_transferred_between_agencies: 'Panggilan disambung ke pihak lain',
-  claims_authority: 'Mengaku polis atau pegawai',
+  claims_authority: 'Mengaku sebagai pegawai',
   victim_framing: 'Kata anda mangsa',
   mentions_family_involvement: 'Libatkan keluarga anda',
   threatens_arrest_or_freeze: 'Ugut tangkap atau beku akaun',
