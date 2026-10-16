@@ -44,6 +44,7 @@ function WarningLayerInner({ warnings }: { warnings: WarningMessage[] }) {
   const dismissRef = useRef<HTMLButtonElement>(null);
   const { status, end, script, risk, riskHistory } = useCall();
   const [whyOpen, setWhyOpen] = useState(false);
+  const [cardOpen, setCardOpen] = useState(false);
   const [speaking, setSpeaking] = useState(false);
 
   // Spoken warning: each new strong/hold clip plays once; a newer one stops
@@ -120,7 +121,13 @@ function WarningLayerInner({ warnings }: { warnings: WarningMessage[] }) {
                 >
                   {bannerNs.cardTitle}
                 </div>
-                <div className="warn-card__text">{banner.text}</div>
+                <div
+                  className="warn-card__text"
+                  data-open={cardOpen || undefined}
+                  onClick={() => setCardOpen((o) => !o)}
+                >
+                  {banner.text}
+                </div>
               </div>
               <button
                 type="button"
