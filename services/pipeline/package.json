@@ -9,7 +9,8 @@
     "test": "vitest run",
     "typecheck": "tsc -p .",
     "try:jev": "tsx --env-file=../../.env scripts/try-jev.ts",
-    "try:gemini": "tsx scripts/try-gemini.ts"
+    "try:gemini": "tsx scripts/try-gemini.ts",
+    "jev": "tsx --env-file-if-exists=../../.env scripts/agent-jev.ts"
   },
   "dependencies": {
     "@google/genai": "^2.29.0",
