@@ -1,22 +1,10 @@
 import { useState, type ReactNode } from 'react';
-import { ACCOUNT_NAME, RELEASE_DELAY_SEC, formatRm, type BankScreen } from './bankMachine';
+import { RELEASE_DELAY_SEC, formatRm } from './bankMachine';
+import { bankStrings } from './strings';
 import { langOf } from '../call/labels';
 import { useCall } from '../call/CallProvider';
 import { holdExplanation, holdStrings } from './explain';
 import type { BankSession } from './useBankSession';
-
-const QUICK_RECIPIENTS = ['Mak', 'Landlord', 'Akaun selamat Bank Negara'];
-
-const TITLES: Partial<Record<BankScreen, string>> = {
-  home: 'DemoBank',
-  form: 'Transfer money',
-  pending: 'Sending transfer…',
-  completed: 'Transfer sent',
-  confirm: 'Before you continue',
-  countdown: 'Releasing transfer',
-  releasing: 'Releasing transfer…',
-  released: 'Transfer released',
-};
 
 // The fake bank app, drawn over the call in the light iOS grouped style. Demo data only.
 export function BankApp({ bank }: { bank: BankSession }) {
@@ -24,12 +12,13 @@ export function BankApp({ bank }: { bank: BankSession }) {
   const { screen, transfer } = state;
   const lang = langOf(useCall().script?.language);
   const hold = holdStrings(lang);
+  const b = bankStrings(lang);
   const canClose = screen !== 'pending' && screen !== 'releasing';
 
   // Top-left text button: steps back where the machine has a back step, else closes.
   const steps = screen === 'form' || screen === 'confirm' || screen === 'countdown';
-  const navLabel = screen === 'held' ? hold.back : steps ? '‹ Back' : 'Close';
-  const title = screen === 'held' ? hold.heldTitle : TITLES[screen];
+  const navLabel = screen === 'held' ? hold.back : steps ? b.back : b.close;
+  const title = screen === 'held' ? hold.heldTitle : screen === 'closed' ? undefined : b.titles[screen];
 
   return (
     <section className="bank" aria-label="Bank app">
@@ -46,13 +35,13 @@ export function BankApp({ bank }: { bank: BankSession }) {
       <div className="bank__body">
         {screen === 'home' && (
           <>
-            <div className="bank__section">Accounts</div>
+            <div className="bank__section">{b.accounts}</div>
             <Group>
-              <Row label={ACCOUNT_NAME} value={formatRm(state.balanceRm)} />
-              <Row label="Available balance" value={formatRm(state.balanceRm)} />
+              <Row label={b.accountName} value={formatRm(state.balanceRm)} />
+              <Row label={b.availableBalance} value={formatRm(state.balanceRm)} />
             </Group>
             {!bank.live && (
-              <p className="bank__note">The call has ended. Start a new call to try a transfer.</p>
+              <p className="bank__note">{b.callEnded}</p>
             )}
             <div className="bank__actions">
               <button
@@ -61,7 +50,7 @@ export function BankApp({ bank }: { bank: BankSession }) {
                 disabled={!bank.live}
                 onClick={() => dispatch({ type: 'openTransfer' })}
               >
-                Transfer money
+                {b.transferMoney}
               </button>
             </div>
           </>
@@ -76,9 +65,9 @@ export function BankApp({ bank }: { bank: BankSession }) {
         {screen === 'completed' && transfer && (
           <Result
             rows={[
-              ['To', transfer.toAccount],
-              ['Amount', formatRm(transfer.amountRm)],
-              ['New balance', formatRm(state.balanceRm)],
+              [b.to, transfer.toAccount],
+              [b.amount.replace(' (RM)', ''), formatRm(transfer.amountRm)],
+              [b.newBalance, formatRm(state.balanceRm)],
             ]}
             onDone={() => dispatch({ type: 'done' })}
           />
@@ -89,19 +78,18 @@ export function BankApp({ bank }: { bank: BankSession }) {
         {screen === 'confirm' && (
           <>
             <p className="bank__text">
-              Scammers often tell you to say this. Only continue if nobody on a call asked you to make
-              this transfer.
+              {b.confirmText}
             </p>
             <div className="bank__actions">
               <button type="button" className="bank__btn" onClick={() => dispatch({ type: 'back' })}>
-                Go back
+                {b.goBack}
               </button>
               <button
                 type="button"
                 className="bank__link"
                 onClick={() => dispatch({ type: 'confirmRelease' })}
               >
-                Nobody asked me to, continue
+                {b.nobodyAsked}
               </button>
             </div>
           </>
@@ -110,7 +98,7 @@ export function BankApp({ bank }: { bank: BankSession }) {
         {screen === 'countdown' && transfer && (
           <>
             <p className="bank__text">
-              {formatRm(transfer.amountRm)} to {transfer.toAccount} will be released in
+              {b.releasedIn(formatRm(transfer.amountRm), transfer.toAccount)}
             </p>
             <div className="bank__count-card">
               <div className="bank__count" role="timer" aria-live="polite">
@@ -124,10 +112,10 @@ export function BankApp({ bank }: { bank: BankSession }) {
                 aria-hidden="true"
               />
             </div>
-            <p className="bank__note">In production this cooling-off period would be 24 hours.</p>
+            <p className="bank__note">{b.coolingOff}</p>
             <div className="bank__actions">
               <button type="button" className="bank__destructive" onClick={() => dispatch({ type: 'back' })}>
-                Cancel
+                {b.cancel}
               </button>
             </div>
           </>
@@ -138,9 +126,9 @@ export function BankApp({ bank }: { bank: BankSession }) {
         {screen === 'released' && transfer && (
           <Result
             rows={[
-              ['To', transfer.toAccount],
-              ['Amount', formatRm(transfer.amountRm)],
-              ['New balance', formatRm(state.balanceRm)],
+              [b.to, transfer.toAccount],
+              [b.amount.replace(' (RM)', ''), formatRm(transfer.amountRm)],
+              [b.newBalance, formatRm(state.balanceRm)],
             ]}
             onDone={() => dispatch({ type: 'done' })}
           />
@@ -171,7 +159,9 @@ function TransferForm({ bank }: { bank: BankSession }) {
   const [amount, setAmount] = useState(state.transfer ? String(state.transfer.amountRm) : '');
   const [error, setError] = useState<string>();
   const paused = bank.risk?.action === 'hold_transfers';
-  const t = holdStrings(langOf(useCall().script?.language));
+  const lang = langOf(useCall().script?.language);
+  const t = holdStrings(lang);
+  const b = bankStrings(lang);
 
   return (
     <form
@@ -193,17 +183,17 @@ function TransferForm({ bank }: { bank: BankSession }) {
         </p>
       )}
 
-      <div className="bank__section">Transfer from {ACCOUNT_NAME}</div>
+      <div className="bank__section">{b.transferFrom} {b.accountName}</div>
       <Group>
         <div className="bank__row">
           <label className="bank__row-label" htmlFor="bank-to">
-            Recipient
+            {b.recipient}
           </label>
           <input
             id="bank-to"
             className="bank__input"
             type="text"
-            placeholder="Akaun penerima"
+            placeholder={b.recipientPlaceholder}
             autoComplete="off"
             value={account}
             onChange={(e) => setAccount(e.target.value)}
@@ -211,7 +201,7 @@ function TransferForm({ bank }: { bank: BankSession }) {
         </div>
         <div className="bank__row">
           <label className="bank__row-label" htmlFor="bank-amount">
-            Amount (RM)
+            {b.amount}
           </label>
           <input
             id="bank-amount"
@@ -225,11 +215,11 @@ function TransferForm({ bank }: { bank: BankSession }) {
           />
         </div>
       </Group>
-      <p className="bank__note">Available balance {formatRm(state.balanceRm)}</p>
+      <p className="bank__note">{b.availableBalance} {formatRm(state.balanceRm)}</p>
 
-      <div className="bank__section">Suggested</div>
+      <div className="bank__section">{b.suggested}</div>
       <Group>
-        {QUICK_RECIPIENTS.map((name) => (
+        {b.quickRecipients.map((name) => (
           <button key={name} type="button" className="bank__row bank__row--button" onClick={() => setAccount(name)}>
             {name}
           </button>
@@ -244,7 +234,7 @@ function TransferForm({ bank }: { bank: BankSession }) {
 
       <div className="bank__actions">
         <button type="submit" className="bank__btn" disabled={!bank.live}>
-          Send transfer
+          {b.sendTransfer}
         </button>
       </div>
     </form>
@@ -318,6 +308,7 @@ function Status({ detail }: { detail?: ReactNode }) {
 }
 
 function Result({ rows, onDone }: { rows: [string, string][]; onDone(): void }) {
+  const b = bankStrings(langOf(useCall().script?.language));
   return (
     <>
       <Group>
@@ -327,7 +318,7 @@ function Result({ rows, onDone }: { rows: [string, string][]; onDone(): void }) 
       </Group>
       <div className="bank__actions">
         <button type="button" className="bank__btn" onClick={onDone}>
-          Done
+          {b.done}
         </button>
       </div>
     </>

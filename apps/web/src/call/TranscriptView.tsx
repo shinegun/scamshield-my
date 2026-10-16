@@ -17,6 +17,9 @@ export function TranscriptView() {
   const { transcript, riskHistory, status, script } = useCall();
   const endRef = useRef<HTMLDivElement>(null);
   const lang = langOf(script?.language);
+  // Signals only label a call that has reached a warning, so an innocent call's
+  // low-score flags (ADR 6 keeps them in the risk) never show as accusations.
+  const flagged = useMemo(() => riskHistory.some((r) => r.action !== 'none'), [riskHistory]);
   const signals = useMemo(() => callerSignals(transcript, riskHistory), [transcript, riskHistory]);
 
   useEffect(() => {
@@ -41,7 +44,7 @@ export function TranscriptView() {
       )}
       {transcript.map((line, i) => {
         const tone = i === newest ? 'newest' : i > newest ? 'secondary' : newest - i <= 2 ? 'secondary' : 'tertiary';
-        const sig = line.speaker === 'caller' ? signals.get(i) : undefined;
+        const sig = line.speaker === 'caller' && flagged ? signals.get(i) : undefined;
         return (
           <div key={i} className="caption" data-tone={tone} lang={script?.language}>
             {line.speaker === 'user' ? `You: ${line.text}` : line.text}

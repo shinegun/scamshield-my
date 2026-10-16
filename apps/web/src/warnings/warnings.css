@@ -255,5 +255,13 @@
     -webkit-line-clamp: 3;
     line-clamp: 3;
     overflow: hidden;
+    cursor: pointer;
+  }
+  /* Tap the card to read the whole warning. */
+  .warn-card__text[data-open] {
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    overflow: visible;
   }
 }

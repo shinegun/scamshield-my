@@ -9,7 +9,7 @@ ScamShield listens to a phone call, warns you in your own language as the signs 
 **https://scamshield-my-511604.web.app** works in any browser, on a phone or a laptop. It takes about two minutes:
 
 1. On a laptop the phone is already ringing with the Manglish scam; on a phone, pick a call from the list. There are three: the Malay scam, the same scam in Manglish, and an innocent call from a bank. Choose 2× to go faster, then press **Accept**.
-2. The call plays as live captions, with the newest caller line large and plain-word signals ("Claims to be police or an official") under the line that raised them. On a laptop, the "What ScamShield hears" panel beside the phone shows the risk, the scam stage, the risk over time and the signals heard so far.
+2. The call plays as live captions, with the newest caller line large and plain-word signals ("Claims to be an official") under the line that raised them. On a laptop, the "What ScamShield hears" panel beside the phone shows the risk, the scam stage, the risk over time and the signals heard so far.
 3. A notification card warns early. When the call turns dangerous, a scam alert covers the call and is read aloud. Press **Continue call** to stay on the line (End Call ends it).
 4. Press **Open bank app** and try to send money to the "safe account". The transfer is paused, and the bank explains why in plain words.
 5. Press the red end button. The call summary shows the peak risk, when the first warning came, the money kept safe and a timeline of what happened.

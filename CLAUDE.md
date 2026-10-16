@@ -10,7 +10,7 @@ Most of the repo is not built yet. `packages/shared` is the only package with co
 
 ## How we work
 
-For any task with more than one step or more than a couple of files, use the `orchestrator` skill: the main session (Opus) plans, decides and reviews, and delegates searching, implementation and command-running to Sonnet and Haiku subagents. One-file edits and quick questions are done inline.
+For any task with more than one step or more than a couple of files, use the `orchestrator` skill: one conversation, cheap layers first (`grep`, `git`, `gh`), the advisor at three set moments, and at most two read-only helpers for large reads. The main session makes the changes. One-file edits and quick questions are done inline.
 
 ## Commands
 
