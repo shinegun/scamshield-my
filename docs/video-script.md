@@ -6,6 +6,8 @@ Record from the live link (https://scamshield-my-511604.web.app) in a 1440×768 
 
 Add English subtitles for everything, including the Malay spoken warning.
 
+To have an agent cut the video from your voiceover recording, see [`tools/video/BRIEF.md`](../tools/video/BRIEF.md).
+
 ---
 
 ## 0:00–0:25 · The real story (25 s)

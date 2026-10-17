@@ -1,0 +1,22 @@
+{
+  "voiceover": "vo/voiceover.wav",
+  "segments": [
+    { "id": "intro", "source": "cards/intro.png", "duration": 7.5, "fadeIn": 0.5, "note": "story beat 1" },
+    { "id": "scam-call", "source": "shots/scam/video.webm", "in": 3.5, "out": 46.5, "note": "accept to transfer paused, uncut" },
+    { "id": "scam-paused", "source": "shots/scam/video.webm", "in": 46.5, "out": 50.5, "crop": { "x": 0, "y": 40, "w": 1440, "h": 810 }, "note": "punch in on Transfer paused" },
+    { "id": "race", "source": "shots/race/video.webm", "in": 2, "out": 12.8 },
+    { "id": "title", "source": "cards/title.png", "duration": 4, "fadeOut": 1 }
+  ],
+  "audio": [
+    { "source": "vo", "in": 0.0, "out": 7.2, "at": 0.2, "note": "VO: the real story" },
+    { "source": "vo", "in": 9.3, "out": 16.1, "segment": "scam-call", "t": 8.5, "note": "VO: this is ScamShield" },
+    { "source": "vo", "in": 17.7, "out": 24.7, "segment": "scam-call", "t": 16.5, "note": "VO: caller hands over" },
+    { "source": "shots/scam/warning-1.mp3", "segment": "scam-call", "t": 25.81, "note": "spoken warning, as it played in the app" },
+    { "source": "vo", "in": 26.8, "out": 31.6, "segment": "scam-call", "t": 38.0, "note": "VO: asks for money" },
+    { "source": "vo", "in": 33.1, "out": 40.3, "segment": "race", "t": 3.0, "note": "VO: race numbers" }
+  ],
+  "captions": [
+    { "text": "Spoken warning: “This call shows signs of a scam. Hang up and call your bank or 997.”", "segment": "scam-call", "t": 26.0, "duration": 6 }
+  ],
+  "captionFixes": { "MalayScam": "Malay scam", "235ms": "235 milliseconds" }
+}

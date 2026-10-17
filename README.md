@@ -93,6 +93,7 @@ Fraud dashboard (web)  ◀──realtime──  Firestore  ◀── sessions, r
 | `firebase.json`, `apps/web/deploy.sh` | Done. Firebase Hosting for the web app (see "Live demo"). |
 | `firestore.rules` | Done, deployed. Anyone can read `sessions/**`; every client write is refused. The pipeline writes through the Admin SDK. Deploy with `firebase deploy --only firestore:rules --project scamshield-my-511604`. |
 | `scripts/health-check.ts` | Done. `pnpm health` plays the Manglish scam and the innocent call against the live pipeline: exit 0 when the scam is held and the innocent call isn't, 1 on a wrong result, 2 when unreachable or switched off. Run before recording and submitting. |
+| `tools/video` | Done, 10 tests. Demo-video pipeline for an editing agent ([brief](tools/video/BRIEF.md)): `pnpm capture` records the scripted shots from the live link with Playwright and logs every call line, warning and click with its time, saving the spoken-warning audio; `pnpm transcribe` gives word timings for the voiceover with whisper.cpp; `pnpm render` cuts an edit list (`edl.json`) into a captioned 1080p MP4 with ffmpeg. Output goes to the gitignored `tools/video/out/`. |
 
 ## Run it
 
