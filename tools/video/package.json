@@ -1,0 +1,25 @@
+{
+  "name": "@scamshield/video",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "capture": "tsx src/capture.ts",
+    "transcribe": "tsx src/transcribe.ts",
+    "frames": "tsx src/frames.ts",
+    "render": "tsx src/render.ts",
+    "typecheck": "tsc -p . --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "card": "tsx src/cards.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "playwright": "1.64.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "@scamshield/shared": "workspace:*"
+  }
+}
